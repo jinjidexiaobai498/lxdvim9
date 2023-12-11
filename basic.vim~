@@ -1,9 +1,6 @@
 vim9script
 
 def! g:Stl_mode(): string
-	if &filetype == 'help'
-		return 'HELP'
-	endif
 	var a = mode()
 	if a == 'n'
 		a = "NORMAL" 
@@ -17,28 +14,15 @@ def! g:Stl_mode(): string
 	return a
 enddef
 
-import "./plugin/terminal-help/terminal-help.vim" as term
-
-import "./plugin/vim-project-session/project-session-list.vim" as psl
-
-import "./keymap.vim" as keymap
-
-import "./plugin.vim" as plugin 
-
-export def BasicConfig()
+import "./plugin/terminal-help/setup.vim" as term
+import "./plugin/vim-project-session/project-session-list.vim" as psl import "./keymap.vim" as keymap import "./plugin.vim" as plugin export def BasicConfig()
 	BasicOptionConfig()
-
+	keymap.BasicKeymap()
+	plugin.InstallPlugVim()
+	plugin.BasicPluginLoad()
+	keymap.BasicPluginKeymap()
 	term.Setup()
 	psl.Setup()
-
-	keymap.BasicKeymap()
-
-	plugin.InstallPlugVim()
-
-	plugin.BasicPluginLoad()
-
-	keymap.BasicPluginKeymap()
-
 	BasicPreferConfig()
 enddef
 
@@ -160,8 +144,6 @@ export def BasicOptionConfig()
 enddef
 
 export def BasicPreferConfig()
-
-	colorscheme darkblue
 	highlight Normal ctermbg=none
 	highlight NonText ctermbg=none
 enddef
