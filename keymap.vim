@@ -48,18 +48,27 @@ export def BasicKeymap()
 
 	# emulater Emacs keybinding
 	# alt = 
-	inoremap i <ESC>I inoremap a <ESC>A inoremap <c-f> <Right>
+	
+	inoremap i <ESC>I 
+
+	inoremap a <ESC>A
+
+	inoremap <c-f> <Right>
 	inoremap <c-b> <Left>
-	#inoremap <c-k> <ESC>d$a
-	nmap <C-n> :20Lexplore<cr>
+	inoremap <c-l> <ESC>ldli
+	inoremap <c-k> <ESC>ld$a
+
+	#nmap <C-n> :20Lexplore<cr>
 enddef
 
 export def BasicPluginKeymap()
 	nmap ,t :TaskList<CR>
-	nmap ,n :NERDTreeToggle<CR>
-	nmap ,d :NERDTreeFind<CR>
 	nmap ,s :TagbarToggle<CR>
+	nmap ,n :NERDTreeFind<CR>
+	nmap ,d :NERDTreeFind<CR>
 	nmap ,p <Plug>PSLPopupBrowser
+	nmap ,c <Plug>ColorsPopupBrowser
+	nmap <leader>sc <Plug>ColorsSync
 	nmap <leader>p <Plug>PSLPopupBrowser
 	nmap <leader>ss <Plug>PSLSave
 	nmap <leader>th <Plug>HortTerminalToggle
@@ -67,24 +76,29 @@ export def BasicPluginKeymap()
 	tnoremap <leader>th <Plug>HortTerminalToggle
 	tnoremap <leader>tv <Plug>VertTerminalToggle
 
+
+	nmap <C-n> :NERDTreeToggle<CR>
 	nmap <C-\> <Plug>VertTerminalToggle
 
 	nmap <C-l> <Plug>HortTerminalToggle
 	tnoremap <C-\> <Plug>VertTerminalToggle
 	tnoremap <C-l> <Plug>HortTerminalToggle
 
+
+	FzfKeymap()
+
 	if executable('lazygit')
 		nmap ,g :!lazygit<CR>
 	endif
 enddef
 
-export def PluginKeymap(flag = true)
-	if !flag
-		return
-	endif
+
+def FzfKeymap()
 
 	#find 
 	nmap <leader>ft :BTag<CR>
+	nmap <leader>fc :Colors<CR>
+	nmap <leader>fb :Buffers<CR>
 	nmap <leader>fT :Tags<CR>
 	nmap <leader>ff :Files<CR> 
 	nmap <leader>fl :BLines<CR> 
@@ -101,6 +115,15 @@ export def PluginKeymap(flag = true)
 	nmap ,f :Files<CR>
 	nmap ,l :Lines<CR>
 	
+enddef
+
+
+export def PluginKeymap(flag = true)
+	if !flag
+		return
+	endif
+
+	#FzfKeymap()
 	LspKeymapLoad()
 
 enddef

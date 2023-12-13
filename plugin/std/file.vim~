@@ -93,6 +93,6 @@ export class File
 	enddef
 endclass
 def Test()
-#	writefile(['a'], '~/llt.txt', 'p')
+	writefile(['a'], '~/llt.txt', 'p')
 enddef
 #Test()

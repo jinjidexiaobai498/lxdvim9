@@ -17,12 +17,15 @@ export def InstallPlugVim(): bool
 
 	if !filereadable(vim_plug_path)
 		echom "Installing Vim-plug..."
+
 		if using_neovim
+
 			silent !mkdir -p ~/.config/nvim/autoload
 			silent !curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 		else
 			silent !mkdir -p ~/.vim/autoload
 			silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
 		endif
 		vim_plug_just_installed = true
 	endif
@@ -68,10 +71,6 @@ export def PluginLoad(is_just_install: bool)
 	 g:asyncomplete_auto_completeopt = 0
 	set completeopt=menuone,noinsert,noselect,preview
 
-	# Airline
-	#Plug 'vim-airline/vim-airline'
-	#Plug 'vim-airline/vim-airline-themes'
-	
 	# Code and files fuzzy finder
 	Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 	Plug 'junegunn/fzf.vim'
@@ -80,20 +79,22 @@ export def PluginLoad(is_just_install: bool)
 	# A couple of nice colorschemes
 	# Plug 'fisadev/fisa-vim-colorscheme'
 	Plug 'patstockwell/vim-monokai-tasty'
-	# Nice icons in the file explorer and file type status line.
-	#Plug 'ryanoasis/vim-devicons'
-
 	Plug 'scrooloose/nerdtree'
 	# Class/module browser
 	Plug 'majutsushi/tagbar'
 	# Surround
 	Plug 'tpope/vim-surround'
+	Plug 'fisadev/FixedTaskList.vim'
 	# Generate html in a simple way
 	#Plug 'mattn/emmet-vim'
 	# Paint css colors with the real color
 	#Plug 'lilydjwg/colorizer'
-	Plug 'fisadev/FixedTaskList.vim'
-
+	# Nice icons in the file explorer and file type status line.
+	#Plug 'ryanoasis/vim-devicons'
+	# Airline
+	#Plug 'vim-airline/vim-airline'
+	#Plug 'vim-airline/vim-airline-themes'
+	
 	call plug#end()
 
 	if is_just_install || !is_installed_plugins
@@ -163,14 +164,22 @@ enddef
 export def BasicPluginLoad()
 
 	call plug#begin("~/.vim/plugged")
+	# Code and files fuzzy finder
+	Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+	Plug 'junegunn/fzf.vim'
+
+	# A couple of nice colorschemes
+	Plug 'fisadev/fisa-vim-colorscheme'
+	Plug 'patstockwell/vim-monokai-tasty'
+
+	Plug 'scrooloose/nerdtree'
 	# Code commenter
 	Plug 'scrooloose/nerdcommenter'
-	Plug 'scrooloose/nerdtree'
 	# Class/module browser
 	Plug 'majutsushi/tagbar'
+	Plug 'fisadev/FixedTaskList.vim'
 	# Surround
 	Plug 'tpope/vim-surround'
-	Plug 'fisadev/FixedTaskList.vim'
 	call plug#end()
 
 	var flag = g.GetIsBasicInstalledPlugins()

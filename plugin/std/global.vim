@@ -12,6 +12,27 @@ export const SOCKET = 'socket'
 export const FIFO = 'fifo'
 export const ALL_OTHER = 'other'
 
+export var debug = true
+
+def Info(...msgs: list<string>)
+	var s = ''
+	for i in msgs
+		s ..= i
+	endfor
+	echom s
+enddef
+
+def Log(...msgs: list<any>)
+	if debug
+		return
+	endif
+	var s = ''
+	for i in msgs
+		s ..= i->string()
+	endfor
+	echom s
+enddef
+
 export class Popup
 
 endclass
@@ -37,6 +58,7 @@ class PopupOption
 	enddef
 
 endclass
+
 def Test()
 	var p = PopupOption.new(['yes', 'no'])
 	p.Print()
@@ -104,7 +126,6 @@ enddef
 def Test2()
 	Default_PopUp(['111', '222', '333'])
 enddef
-
 #TestDefault()
 #Test()
 #Test2()

@@ -149,6 +149,6 @@ def Test2()
 	:redir => oldfiles
 	exe 'oldfiles'
 	:redir END
-	echom oldfiles->string()->split('\n')
+	echom oldfiles->string()
 enddef
-#Test2()
+Test2()

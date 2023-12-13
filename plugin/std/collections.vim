@@ -1,15 +1,24 @@
 vim9script
 
-export var debug = false
+export var debug = true
 
-def Log(msg: string)
+def Info(...msgs: list<string>)
+	var s = ''
+	for i in msgs
+		s ..= i
+	endfor
+	echom s
+enddef
 
+def Log(...msgs: list<any>)
 	if debug
-
-		echom msg
-
+		return
 	endif
-
+	var s = ''
+	for i in msgs
+		s ..= i->string()
+	endfor
+	echom s
 enddef
 
 export class Deque
@@ -22,10 +31,67 @@ export class Deque
 	this.is_changed = false
 	this.buf_lines: list<any> = []
 
-	def new(capacity: number)
+	def new(capacity: number = 0)
 		this.data = repeat([null], capacity)
 		this.capacity = capacity->copy()
 	enddef
+
+	def newDeque(cl: list<any>)
+		this.data = cl->copy()
+		this.len = this.data->len()
+		this.back = this.len
+		this.capacity = this.len
+		this.is_changed = true
+	enddef
+
+	def Remove(idx: number): any
+
+		var i = this.TransIndex(idx)
+
+		this.len -= 1
+
+		this.capacity -= 1
+
+		this.is_changed = true
+
+		if i < this.back
+
+			this.back -= 1
+
+		endif
+
+		if i < this.front
+
+			this.front -= 1
+
+		endif
+
+		this.back = this.back % this.capacity
+
+		this.front = this.front % this.capacity
+
+		return this.data->remove(i)
+
+	enddef
+
+	#def RemoveList(idx: number, end: number = -1): any
+	#var res: any = null
+	#var i = this.TransIndex(idx)
+	#var endi = this.TransIndex(end)
+	#var diss = 0
+	#if i < endi
+	#diss = (endi - i + 1)
+	#res = this.data->remove(i, endi)
+	#else
+	#diss = (endi + this.len - i + 1)
+	#res = this.data->remove(i, -1)
+	#res->extend(this.data->remove(0, endi))
+	#endif
+	#this.len -= diss
+	#this.capacity -= diss
+	#this.is_changed = true
+	#return res
+	#enddef
 
 	def GetList(): list<any>
 
@@ -37,9 +103,9 @@ export class Deque
 		if this.front <= this.back && this.len != this.capacity
 			this.buf_lines = this.data->slice(this.front, this.back)->copy()
 		else
-			this.buf_lines = this.data->slice(0, this.back)->copy()
 			#Log('res: ' .. res->string())
-			this.buf_lines->extend(this.data->slice(this.front)->copy())
+			this.buf_lines = this.data->slice(this.front)->copy()
+			this.buf_lines->extend(this.data->slice(0, this.back)->copy())
 		endif
 		this.is_changed = false
 		return this.buf_lines->copy()
@@ -120,7 +186,7 @@ export class Deque
 		this.back = (this.back + 1) % this.capacity
 		this.len += 1
 		this.is_changed = true
-		return this.back - 1
+		return (this.back - 1)->copy()
 	enddef
 
 	def PopFront(): any
@@ -130,7 +196,7 @@ export class Deque
 		endif
 
 		var res = this.Front()
-		this.data[this.front] = null
+		#this.data[this.front] = null
 		this.front = (this.front + 1) % this.capacity
 		this.is_changed = true
 		return res
@@ -150,7 +216,7 @@ export class Deque
 		this.data[this.front] = elem->copy()
 		this.len += 1
 		this.is_changed = true
-		return this.front
+		return this.front->copy()
 	enddef
 
 	def MinusOne(back_or_front = true)
@@ -176,10 +242,12 @@ export class Deque
 		return true
 	enddef
 	def TransIndex(index: number): number
-		assert_true(this.CheckIndex(index))
+		assert_true(this.CheckIndex(index), 'At TransIndex, invalid index')
 		var res = index->copy()
 		if index < 0
-			res = (index + this.len + this.front) % this.capacity
+			res = (index + this.back + this.capacity) % this.capacity
+		else
+			res = (index + this.front) % this.capacity
 		endif
 		Log("TransIndex of input: " .. index .. " is : " .. res)
 		return res
@@ -198,25 +266,6 @@ export class Deque
 		endif
 	enddef
 
-	def ToString(): string
-		var ss = ''
-		if this.front <= this.back
-			ss = this.data[this.front : this.back]->string()
-		else
-			ss ..= this.data[ : this.back]->string()
-			ss ..= this.data[this.front : ]->string()
-		endif
-		return ss
-	enddef
-
-	def Print()
-		var i = this.front->copy()
-		while i != this.back
-			echom this.data[i]->string()
-			i = (i + 1) % this.capacity
-		endwhile
-	enddef
-
 	def PrintProto()
 		Log('Print Proto')
 		echom this->string()
@@ -228,18 +277,17 @@ export class Deque
 
 endclass
 
+def Test2()
+	var d = Deque.newDeque(['1', '2', '3', '4', '5'])
+	#d.PrintProto()
+enddef
+
 def TestDeque()
 	var dq = Deque.new(10)
 	dq.PushBack("hello world pb1")
 	dq.PushFront("pf2")
 	dq.PushFront('pffffffffffffffffff3')
 	dq.PushFront('pffffffffffffffffff44444444')
-	dq.PushFront('pffffffffffffffffff55555555')
-	dq.PushFront('pffffffffffffffffff55555555')
-	dq.PushFront('pffffffffffffffffff55555555')
-	dq.PushFront('pffffffffffffffffff55555555')
-	dq.PushFront('pffffffffffffffffff55555555')
-	dq.PushFront('pffffffffffffffffff55555555')
 	dq.PushFront('pffffffffffffffffff55555555')
 	#dq.PrintProto()
 	var i = 0
@@ -255,24 +303,33 @@ def TestDeque()
 	var res = dq.Get(20)
 	assert_true(res == str)
 
-	dq.PrintProto()
-
 	var l = dq.GetList()
-	dq.PrintProto()
-	var x = dq.GetList()
 	echom l->string()
+	#dq.PrintProto()
+
+	dq.Remove(20)
+	dq.Remove(0)
+	dq.Remove(-1)
+	dq.Remove(-1)
+
+	#dq.PrintProto()
+	var x = dq.GetList()
 	echom 'x : ' .. x->string()
 
 enddef
 
-def Test()
-	var buf_lines = []
-	var res = buf_lines
-	res = res->extend(['111'])
-	echom buf_lines->string()
-	echom res->string()
-
+def Test3()
+	hi link Terminal Search
+	var buf = term_start('/bin/bash', {hidden: 1, term_finish: 'close'})
+	var winid = popup_create(buf, {minwidth: 50, minheight: 20})
 enddef
 
-TestDeque()
-#Test()
+def Test()
+	var bufnr = bufadd('test')
+	bufload(bufnr)
+	setbufline(bufnr, 1, ['test'])
+	var winid = popup_create(bufnr, {minwidth: 50, minheight: 20})
+enddef
+
+#TestDeque()
+Test2()

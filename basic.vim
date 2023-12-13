@@ -1,4 +1,4 @@
-vim9script
+vim9script noclear
 
 def! g:Stl_mode(): string
 	if &filetype == 'help'
@@ -21,15 +21,14 @@ import "./plugin/terminal-help/terminal-help.vim" as term
 
 import "./plugin/vim-project-session/project-session-list.vim" as psl
 
-import "./keymap.vim" as keymap
+import "./plugin/colorscheme-selector/colors.vim" as cl
 
 import "./plugin.vim" as plugin 
 
+import "./keymap.vim" as keymap
+
 export def BasicConfig()
 	BasicOptionConfig()
-
-	term.Setup()
-	psl.Setup()
 
 	keymap.BasicKeymap()
 
@@ -37,9 +36,17 @@ export def BasicConfig()
 
 	plugin.BasicPluginLoad()
 
+	term.Setup()
+
+	psl.Setup()
+
+	cl.Setup()
+
 	keymap.BasicPluginKeymap()
 
-	BasicPreferConfig()
+	PreferConfig()
+
+	cl.LastColorLoad()
 enddef
 
 
@@ -70,8 +77,10 @@ export def BasicOptionConfig()
 		assert_true(mkdir(&backupdir, 'p', 0o755))
 	endif
 
-	if !isdirectory(&dir)
+	if !isdirectory(&dir) 
+
 		assert_true(mkdir(&dir, 'p', 0o755))
+
 	endif
 
 	set undofile
@@ -89,14 +98,14 @@ export def BasicOptionConfig()
 	highlight Normal ctermbg=none
 	highlight NonText ctermbg=none
 
-	set statusline=%7{g:Stl_mode()}\ [%4.100F]\ %m%r%h%w%q\ [%4.10{&ff}]\ [%4.20Y]\ %=[NROW:%4l,NCOL:%4v][%3p%%]\ %20{strftime(\"%d/%m/%y\ -\ %H:%M\")}
+	set statusline=[%2.10{g:Stl_mode()}]\ %4.100F\ %m%r%h%w%q\ [%1.10{&ff}]\ [%1.20Y]\ %=[NROW:%1.10l,NCOL:%1.10v][%1.3p%%]\ %20{strftime(\"%d/%m/%y\ -\ %H:%M\")}
 
 	set nocompatible #不要使用vi的键盘模式，而是vim自己的
 	filetype on # 侦测文件类型
 	filetype plugin indent on 
 	syntax on
 	syntax enable
-	colorscheme default
+	colorscheme industry
 
 	set autoread # 设置当文件被改动时自动载入
 	set completeopt=preview,menu  #代码补全 
@@ -159,9 +168,11 @@ export def BasicOptionConfig()
 
 enddef
 
-export def BasicPreferConfig()
+export def PreferConfig()
 
-	colorscheme darkblue
+	#colorscheme vim-monokai-tasty
+	#colorscheme fisa
+	colorscheme elflord
 	highlight Normal ctermbg=none
 	highlight NonText ctermbg=none
 enddef
