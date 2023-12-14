@@ -1,6 +1,5 @@
 vim9script
-export const DATA_DIR = expand("~/.vim")
-export const HOME_CONFIG_DIR = expand("~/.config")
+
 export var debug = false
 
 export def EInfo(flag: bool, ...msgs: list<string>)
@@ -50,14 +49,13 @@ export def Log(...msgs: list<any>)
 	echom s
 enddef
 
-export def CloseNerdTree()
-	for buf in getbufinfo({'bufloaded': 1})
-		if buf.name =~ 'NERD_tree'
-			Log('buf: ', buf->string())
-			if !empty(buf.windows)
-				exe 'NERDTreeToggle'
-				exe 'bwipeout ' .. buf.bufnr
-			endif
-		endif
-	endfor
+
+import './global.vim' as G
+def Test()
+	var LLog = GetLog(true)
+	LLog("vim_plug_path: ", G.VIM_PLUG_PATH)
+	LLog("vim_data_path: ", G.VIM_DATA_PATH)
 enddef
+
+
+#Test()

@@ -20,7 +20,8 @@ export def Setup()
 
 	nmap <C-p> :Maps<CR>
 
-	nmap ,f :Files<CR>
+	#nmap ,f :Files<CR>
 	nmap ,l :Lines<CR>
+	nmap ,b :Buffers<CR>
 
 enddef

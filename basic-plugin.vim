@@ -1,43 +1,45 @@
 vim9script
 &encoding = 'utf-8'
-import "./global.vim" as g
+import "./global.vim" as G
 
 var debug = false
 def Log(msg: string)
 	if debug
-		echom msg endif
+		echom msg
+	endif
 enddef
 
 def BasicPluginLoad()
 
+	#var basc_plugins =
 	call plug#begin("~/.vim/plugged")
 
 	# Code and files fuzzy finder
-	Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-	Plug 'junegunn/fzf.vim'
+	G.PlugGlobalAdd('junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }) 
+	G.PlugGlobalAdd('junegunn/fzf.vim') 
 
-	Plug 'scrooloose/nerdtree'
+	G.PlugGlobalAdd('scrooloose/nerdtree') 
 
 	# Class/module browser
-	Plug 'majutsushi/tagbar'
+	G.PlugGlobalAdd('majutsushi/tagbar') 
 
-	Plug 'fisadev/FixedTaskList.vim'
+	G.PlugGlobalAdd('fisadev/FixedTaskList.vim') 
 	# Surround
-	Plug 'tpope/vim-surround'
+	G.PlugGlobalAdd('tpope/vim-surround') 
 
 	# Code commenter
-	Plug 'scrooloose/nerdcommenter'
+	G.PlugGlobalAdd('scrooloose/nerdcommenter') 
 
 	# A couple of nice colorschemes
-	Plug 'fisadev/fisa-vim-colorscheme'
-	Plug 'patstockwell/vim-monokai-tasty'
+	G.PlugGlobalAdd('fisadev/fisa-vim-colorscheme') 
+	G.PlugGlobalAdd('patstockwell/vim-monokai-tasty') 
 
-	Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
+	G.PlugGlobalAdd('liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }) 
 
 
 	call plug#end()
 
-	var flag = g.GetIsBasicInstalledPlugins()
+	var flag = G.GetIsBasicInstalledPlugins()
 	var just_installed = get(g:, '__just_installed__', false)
 	if !flag || just_installed
 		Log("flag of BasicInstalledPlugins" .. flag)

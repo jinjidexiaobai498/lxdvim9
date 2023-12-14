@@ -44,9 +44,9 @@ def TerminalClose(bufnr: number): bool
 		close
 	else
 		Log("Goto Terminal Window " .. wid .. "And back")
-		GotoWin(wid)
+		assert_true(win_gotoid(win_getid(wid)) != 0, 'cannot find the window by winnr : ' .. wid)
 		close
-		GotoWin(cwid)
+		assert_true(win_gotoid(win_getid(cwid)) != 0, 'cannot find the window by winnr : ' .. cwid)
 	endif
 
 	var tjob = term_getjob(bufnr->copy())
@@ -112,7 +112,7 @@ export class Terminal
 				exec "buffer " .. nr
 				Log("create new Window: " .. winnr())
 			else
-				GotoWin(wid)
+				assert_true(win_gotoid(win_getid(wid)) != 0, 'cannot find the window by winnr : ' .. wid)
 			endif
 
 			#insert
@@ -141,8 +141,9 @@ export class Terminal
 
 		#to avoid stack overloop and kill the origin window buffer
 		var wid = winnr()
-		GotoWin(pwid)
-		GotoWin(wid)
+		assert_true(win_gotoid(win_getid(pwid)) != 0, 'cannot find the window by winnr : ' .. pwid)
+		assert_true(win_gotoid(win_getid(wid)) != 0, 'cannot find the window by winnr : ' .. wid)
+
 
 		this.job = term_getjob(this.GetBufnr())
 		Log("new Job , jobinfo: " .. job_info(this.job)->string())
@@ -190,17 +191,15 @@ def Terminal_exit(name: string, j: job, status: number )
 	exec "bdelete! " .. bufnr
 enddef
 
-def GotoWin(wid: number)
-	if win_gotoid(wid)
-		return
-	endif
+def GotoWin(winnr: number)
+
 	try
-		:exe ':' .. wid .. " wincmd w"
+		:exe ':' .. winnr .. " wincmd w"
 	catch /^Vim\%((\a\+)\)\=:E16:/
 		Log('Error on range format')
 		# TODO
 	endtry
-	assert_true(wid == winnr(), 'go to window ' .. wid .. ' failed')
+	assert_true(winnr == winnr(), 'go to window ' .. winnr .. ' failed')
 enddef
 
 

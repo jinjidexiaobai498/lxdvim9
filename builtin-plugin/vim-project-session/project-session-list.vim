@@ -33,16 +33,19 @@ export class SessionList
 	enddef
 
 	def Save()
+
+		g.CloseNerdTree()
 		var p = project.Project.new()
 		var save_name = TranPathToFilename(p.name)
 		var save_path =  save_name .. "__.vim"
 		Log('save_path: ' .. save_path) 
+
 		var ses = session.Session.new(save_path, SESSION_DIR)
+
 		ses.SaveForce()
 
 		if !this.menu_list.ContainsLine(save_path)
 			this.menu_list.Append(save_path)
-
 		endif
 
 	enddef
@@ -120,6 +123,7 @@ export class SessionList
 
 endclass
 
+#Test3()
 export def PopupBrowser(psl: SessionList)
 	Log('start popupbrowser ....')
 	psl.PopupBrowser()
@@ -151,4 +155,3 @@ def Test2()
 	:redir END
 	echom oldfiles->string()->split('\n')
 enddef
-#Test2()
