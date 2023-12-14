@@ -58,6 +58,29 @@ export def InstallPlugVim()
 	Log('just_installed: ' .. just_installed)
 enddef
 
+def PluginLoad()
+
+	var flag = get(g:, 'lxdvim_extend_plug', false)
+
+	if !flag
+		return
+	endif
+
+	var  is_installed_plugins = g.GetIsExtendInstalledPlugins()
+
+	call plug#begin("~/.vim/plugged")
+
+	call plug#end()
+
+	var just_installed = get(g:, '__just_installed__', false)
+	if just_installed || !is_installed_plugins
+		echo "Installing Bundles, please ignore key map error messages"
+		:PlugInstall
+	endif
+
+enddef
+
+
 
 
 # ctlr-p to find all features or go to file "./keymap.vim "
