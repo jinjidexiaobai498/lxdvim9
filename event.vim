@@ -1,11 +1,5 @@
+vim9script
 ###################events#####################
-
-
-augroup EditVimrc
-	autocmd!
-	au BufWritePost .vimrc,vimrc,vimrc9 exe "so %"
-
-augroup END
 
 #定义函数SetTitle，自动插入文件头"
 def SetTitle()
@@ -32,5 +26,17 @@ def SetTitle()
 enddef
 #在shell脚本开头自动增加解释器以及作者等版权信息
 #新建.py,.cc,.sh,.java文件，自动插入文件头"
-autocmd BufNewFile *.py,*.cc,*.sh,*.java,*.cpp,*.c exec call SetTitle()
+export def Setup()
+
+	augroup EditVimrc
+		autocmd!
+		au BufWritePost .vimrc,vimrc,vimrc9 exe "so %"
+	augroup END
+
+	augroup SetTitle
+		au!
+		autocmd BufNewFile *.py,*.cc,*.sh,*.java,*.cpp,*.c exec call SetTitle()
+	augroup END
+
+enddef
 

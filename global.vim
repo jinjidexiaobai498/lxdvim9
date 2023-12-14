@@ -15,9 +15,62 @@ export var IS_EXTEND_INSTALLED_PLUGINS = GetIsExtendInstalledPlugins()
 export var IS_BASIC_INSTALLED_PLUGINS  = GetIsBasicInstalledPlugins()
 export var LSP_STATUS = true
 
+export var debug = false
+def Log(msg: string)
+	if debug
+		echom msg
+	endif
+enddef
+
+
 def Test()
 	echom "vim_plug_path: " .. VIM_PLUG_PATH
 	echom "vim_data_path: " .. VIM_DATA_PATH
 enddef
+
+export def InstallPlugVim()
+	var vim_plug_path = VIM_PLUG_PATH->copy()
+	Log('vim_plug_path: ' .. vim_plug_path)
+
+	var just_installed = get(g:, '__just_installed__', false)
+	
+	if !filereadable(vim_plug_path)
+		echom "Installing Vim-plug..."
+
+		#silent !mkdir -p ~/.vim/autoload
+		#silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+		!mkdir -p ~/.vim/autoload
+		!curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+		g:__just_instaled__ = true
+		just_installed = true
+	endif
+
+
+	# manually load vim-plug the first time
+	if just_installed
+		:execute 'source ' .. fnameescape(vim_plug_path)
+	endif
+
+	# active vim-plug
+	call plug#begin("~/.vim/plugged")
+	call plug#end()
+	Log('just_installed: ' .. just_installed)
+enddef
+
+
+
+# ctlr-p to find all features or go to file "./keymap.vim "
+# some key words about features to use in search
+# ------------------------------------
+# terminal 
+# task
+# tag
+# lsp
+# surround
+# nerdtree
+# fzf
+# comment
+
 
 #Test()

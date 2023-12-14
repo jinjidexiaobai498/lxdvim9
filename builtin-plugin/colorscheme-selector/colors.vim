@@ -132,6 +132,7 @@ export def Setup()
 		au!
 		autocmd VimLeave * call g:Colors_Save()
 	augroup END
+	LastColorLoad()
 enddef
 
 export def PopupBrowser(cl: ColorsList)

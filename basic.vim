@@ -17,44 +17,14 @@ def! g:Stl_mode(): string
 	return a
 enddef
 
-import "./plugin/terminal-help/terminal-help.vim" as term
-
-import "./plugin/vim-project-session/project-session-list.vim" as psl
-
-import "./plugin/colorscheme-selector/colors.vim" as cl
-
-import "./plugin.vim" as plugin 
-
-import "./keymap.vim" as keymap
-
-export def BasicConfig()
-	BasicOptionConfig()
-
-	keymap.BasicKeymap()
-
-	plugin.InstallPlugVim()
-
-	plugin.BasicPluginLoad()
-
-	term.Setup()
-
-	psl.Setup()
-
-	cl.Setup()
-
-	keymap.BasicPluginKeymap()
-
-	PreferConfig()
-
-	cl.LastColorLoad()
-enddef
-
-
 #################### options####################
-export def BasicOptionConfig()
+def BasicOptionConfig()
+
+	g:loaded_netrw       = 0
+	g:loaded_netrwPlugin = 0
 
 	g:mapleader = " "
-	g:maplocalleader = " "
+	g:maplocalleader = ","
 	g:netrw_liststyle = 3
 
 	# use 256 colors when possible
@@ -65,22 +35,27 @@ export def BasicOptionConfig()
 		set guifont=JetBrainsMono_Nerd_Font_Mono:h14
 	endif
 
-	&undodir = expand('~') .. "/.cache/vim/undo"
-	&backupdir = expand('~') ..  "/.cache/vim/backup"
-	&dir =  expand('~') .. "/.cache/vim/swap"
+	var home = expand('~')
+	var DATA_DIR = home .. '/.vim'
+	if !isdirectory(DATA_DIR)
+		assert_true(mkdir(DATA_DIR, 'p'))
+	endif
+
+	var cache = home .. '/.cache/vim'
+	&undodir = cache .. "/undo"
+	&backupdir = cache ..  "/backup"
+	&dir =  cache .. "/swap"
 
 	if !isdirectory(&dir)
-		assert_true(mkdir(&dir, 'p', 0o755))
+		assert_true(mkdir(&dir, 'p'))
 	endif
 
 	if !isdirectory(&backupdir)
-		assert_true(mkdir(&backupdir, 'p', 0o755))
+		assert_true(mkdir(&backupdir, 'p'))
 	endif
 
 	if !isdirectory(&dir) 
-
-		assert_true(mkdir(&dir, 'p', 0o755))
-
+		assert_true(mkdir(&dir, 'p'))
 	endif
 
 	set undofile
@@ -95,8 +70,8 @@ export def BasicOptionConfig()
 	set termguicolors
 
 	#设置透明背景
-	highlight Normal ctermbg=none
-	highlight NonText ctermbg=none
+	#highlight Normal ctermbg=none
+	#highlight NonText ctermbg=none
 
 	set statusline=[%2.10{g:Stl_mode()}]\ %4.100F\ %m%r%h%w%q\ [%1.10{&ff}]\ [%1.20Y]\ %=[NROW:%1.10l,NCOL:%1.10v][%1.3p%%]\ %20{strftime(\"%d/%m/%y\ -\ %H:%M\")}
 
@@ -105,7 +80,7 @@ export def BasicOptionConfig()
 	filetype plugin indent on 
 	syntax on
 	syntax enable
-	colorscheme industry
+	#colorscheme industry
 
 	set autoread # 设置当文件被改动时自动载入
 	set completeopt=preview,menu  #代码补全 
@@ -114,7 +89,7 @@ export def BasicOptionConfig()
 	set ruler                   # 打开状态栏标尺
 	#set makeprg=g++\ -Wall\ \ % #make 运行
 	#set nocursorline              # 突出显示当前行
-	#set cursorline              # 突出显示当前行
+	set cursorline              # 突出显示当前行
 	set magic                   # 设置魔术
 	set foldcolumn=0
 	set foldmethod=indent		#利用缩进折叠代码 
@@ -137,14 +112,14 @@ export def BasicOptionConfig()
 	set history=10000 # 历史记录数
 	set ignorecase #搜索忽略大小写
 	set hlsearch 
-	#set incsearch #搜索逐字符高亮
+	set incsearch #搜索逐字符高亮
 
 	set enc=utf-8 #编码设置
 	set termencoding=utf-8 #屏幕显示的编码
 	set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
 	set langmenu=en
-	#set helplang=cn
-	set helplang=en
+	set helplang=cn
+	#set helplang=en
 
 	#set statusline=[%F]%y%r%m%*%=[Line:%l/%L,Column:%c][%p%%]
 	set laststatus=2 # 总是显示状态行
@@ -154,26 +129,72 @@ export def BasicOptionConfig()
 	set wildmenu # 增强模式中的命令行自动完成操作
 	#set whichwrap+=<,>,h,l # 允许backspace和光标键跨越行边界
 
-	set selection=exclusive
+	#set selection=exclusive
 	set selectmode=mouse,key
 
 	set report=0 # 通过使用: commands命令，告诉我们文件的哪一行被改变过
 
 	set fillchars=vert:\ ,stl:\ ,stlnc:\  # 在被分割的窗口间显示空白，便于阅读
 
-	set showmatch # 高亮显示匹配的括号
+	#set showmatch # 高亮显示匹配的括号
 	set completeopt=longest,menu #打开文件类型检测, 加了这句才可以用智能补全
 
 	#set matchtime=1 " 匹配括号高亮的时间（单位是十分之一秒）
 
 enddef
 
-export def PreferConfig()
+def BasicKeymap()
+	inoremap jk <Esc>
+	tnoremap jk <C-\><C-n>
 
-	#colorscheme vim-monokai-tasty
-	#colorscheme fisa
-	colorscheme elflord
-	highlight Normal ctermbg=none
-	highlight NonText ctermbg=none
+	PairMatch()
+
+	# 回车即选中当前项
+	inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"             
+	inoremap <expr> <Tab>  pumvisible() ? "\<C-y>" : "\<Tab>"             
+
+	nmap <leader>ee :e $MYVIMRC<cr>
+	nmap <silent> <leader>bn :bn<CR>
+	nmap <silent> <leader>bp :bp<CR>
+	nmap <silent> q :bdelete<CR>
+	nmap <silent> s :w !sudo tee "%"<CR>
+
+	nmap <silent> <c-q> :bwipeout<CR>
+	nmap <silent> <c-s> :w<CR>
+
+	# emulater Emacs keybinding
+	# alt = 
+	inoremap i <ESC>I 
+	inoremap a <ESC>A
+	inoremap <c-f> <Right>
+	inoremap <c-b> <Left>
+	inoremap <c-l> <ESC>ldli
+	inoremap <c-k> <ESC>ld$a
+
 enddef
+
+def ClosePair(char: string): string
+	if getline('.')[col('.') - 1] == char
+		return "\<Right>"
+	else
+		return char
+	endif
+enddef
+
+def PairMatch()
+	inoremap ( ()<ESC>i
+	inoremap ) <c-r>=<SID>ClosePair(')')<CR>
+	inoremap { {}<ESC>i
+	inoremap } <c-r>=<SID>ClosePair('}')<CR>
+	inoremap [ []<ESC>i
+	inoremap ] <c-r>=<SID>ClosePair(']')<CR>
+	inoremap " ""<ESC>i
+	inoremap ' ''<ESC>i
+enddef
+
+export def Setup()
+	BasicOptionConfig()
+	BasicKeymap()
+enddef
+
 
