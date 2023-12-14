@@ -2,7 +2,7 @@
 
 ## used plugins list
 
-### basic vim config ( donot include lsp feature)
+### basic vim config which do not include languiage server  feature
 - fzf
 - FixedTaskList
 - vim-surround
@@ -17,6 +17,6 @@ and some built-in plugins which are written by myself
 - terminal-help
 - project-session
 
-### extend  plugins ( mostly about lsp feautures and you can add plugin which you like)
+### extend  plugins ( mostly about languiage server feautures and you can add plugin which you like)
 
 - coc-nvim
