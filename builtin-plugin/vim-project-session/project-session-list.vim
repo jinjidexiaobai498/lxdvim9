@@ -1,12 +1,13 @@
 vim9script
 import "../std/session.vim" as session
 import "../std/global.vim" as g
-import "../std/project.vim" as project import "../std/file.vim" as file import "../std/collections.vim" as col
+import "../std/project.vim" as project 
+import "../std/file.vim" as file 
+import "../std/collections.vim" as col
 var LIST_NAME: string = "list.txt"
 var SESSION_DIR_NAME: string  = "session_histroy"
 var SESSION_DIR: string = g.DATA_DIR .. "/" ..  SESSION_DIR_NAME
 var MENU_LIST_FILE_PATH: string = SESSION_DIR .. "/" .. LIST_NAME
-
 var debug = true
 var Log = g.GetLog(debug)
 var AssertTrue = g.GetAssertTrue('Project-Session-List')
@@ -17,6 +18,7 @@ export class SessionList
 	this.view_lines: list<string>
 	this.removes: list<number>
 	this.lines: list<string>
+	this.is_sync = true
 	this.option = {}
 
 	def new()
@@ -28,14 +30,13 @@ export class SessionList
 		endif
 		#this.session_list = globpath(SESSION_DIR, "*.vim", 0, 1)
 		this.menu_list = file.File.new(MENU_LIST_FILE_PATH)
-		#this.lines = this.menu_list.GetLines()
 	enddef
 
 	def Save()
 
 		g.CloseNerdTree()
 		var p = project.Project.new()
-		var save_path = TranPathToFilename(p.name) .. '.vim'
+		var save_path = TranPathToFilename(p.project_path) .. '.vim'
 
 		Log('save_path: ' .. save_path) 
 
@@ -47,7 +48,6 @@ export class SessionList
 			this.menu_list.Append(save_path)
 			defer this.menu_list.Sync()
 		endif
-
 
 	enddef
 
@@ -64,12 +64,26 @@ export class SessionList
 
 	def Sync()
 
+		if this.is_sync
+			return
+		endif
 
+		uniq(sort(this.removes))
 
+		var dis = 0
+		for i in this.removes
+			this.menu_list.Remove(i - dis)
+			dis += 1
+		endfor
+
+		this.menu_list.Sync()
+		this.removes = []
+		this.is_sync = true
 	enddef
 
 	def Filter(winid: number, key: string): bool
 		if key == 'r'
+			this.is_sync = false
 			win_execute(winid, '@l = line(".")')
 			var lnum = str2nr(@l) 
 
@@ -147,10 +161,12 @@ export class SessionList
 
 	def PopupBrowser()
 
+		this.menu_list.Sync()
+		this.removes = []
 		this.lines = this.menu_list.GetLines()
 		var maxwidth = this.SyncDispLines()
 
-		var winid = popup_menu(disp_lines, {
+		var winid = popup_menu(this.view_lines, {
 			maxheight: 100,
 			minheight: 5,
 			maxwidth: 200,
@@ -220,5 +236,5 @@ enddef
 
 #Test3()
 #TestList()
-TestSave()
+#TestSave()
 

@@ -115,9 +115,9 @@ def Test()
 	var winid = popup_create(bufnr, {minwidth: 50, minheight: 20})
 enddef
 
-Test()
+#Test()
 #TestDefault()
 #Teso()
-Test3()
+#Test3()
 #CloseNerdTree()
 

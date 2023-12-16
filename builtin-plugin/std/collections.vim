@@ -1,25 +1,9 @@
 vim9script
-
-export var debug = true
-
-def Info(...msgs: list<string>)
-	var s = ''
-	for i in msgs
-		s ..= i
-	endfor
-	echom s
-enddef
-
-def Log(...msgs: list<any>)
-	if debug
-		return
-	endif
-	var s = ''
-	for i in msgs
-		s ..= i->string()
-	endfor
-	echom s
-enddef
+import './global.vim' as G
+export var debug = false
+var info = true
+var Log = G.GetLog(debug)
+var Info = G.GetInfo(info)
 
 export class Deque
 	static RESERVE_RATE: float = 1.6
@@ -277,11 +261,6 @@ export class Deque
 
 endclass
 
-def Test2()
-	var d = Deque.newDeque(['1', '2', '3', '4', '5'])
-	#d.PrintProto()
-enddef
-
 def TestDeque()
 	var dq = Deque.new(10)
 	dq.PushBack("hello world pb1")
@@ -318,18 +297,5 @@ def TestDeque()
 
 enddef
 
-def Test3()
-	hi link Terminal Search
-	var buf = term_start('/bin/bash', {hidden: 1, term_finish: 'close'})
-	var winid = popup_create(buf, {minwidth: 50, minheight: 20})
-enddef
-
-def Test()
-	var bufnr = bufadd('test')
-	bufload(bufnr)
-	setbufline(bufnr, 1, ['test'])
-	var winid = popup_create(bufnr, {minwidth: 50, minheight: 20})
-enddef
-
 #TestDeque()
-Test2()
+#Test2()

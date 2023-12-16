@@ -88,7 +88,7 @@ export class File
 		var res = this.buffer->remove(idx)
 		#AssertTrue(res->string() != '0', 'def Remove() failed of object' .. this->string())
 		Log('res: ', res)
-		return res->string()
+		return res
 	enddef
 
 	def  Write()
@@ -128,4 +128,4 @@ def Test()
 	#AssertTrue(false, 'hello', 'what')
 	#Info('xxx', 'yyy')
 enddef
-Test()
+#Test()

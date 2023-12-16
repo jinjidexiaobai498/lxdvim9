@@ -2,7 +2,7 @@ vim9script
 export const DATA_DIR = expand("~/.vim")
 export const HOME_CONFIG_DIR = expand("~/.config")
 export const SELF_PATH = expand('<sfile>:p:h:h')
-export var debug = true
+export var debug = false
 
 export def Debug(...msgs: list<any>)
 	if !debug

@@ -11,12 +11,15 @@ export def Setup()
 		return
 	endif
 
+	g:ColorsList_Config = true
+
 	nmap ,p <Plug>PSLPopupBrowser
 	nmap ,c <Plug>ColorsPopupBrowser
 	nmap ,r <Plug>RecentFiles
+
 	nmap <leader>sc <Plug>ColorsSync
-	nmap <leader>pp <Plug>PSLPopupBrowser
 	nmap <leader>ss <Plug>PSLSave
+	nmap <leader>pp <Plug>PSLPopupBrowser
 	nmap <leader>th <Plug>HortTerminalToggle
 	nmap <leader>tv <Plug>VertTerminalToggle
 

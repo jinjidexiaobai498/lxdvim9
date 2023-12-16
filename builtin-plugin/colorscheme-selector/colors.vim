@@ -83,10 +83,20 @@ export class ColorsList
 		Log('at New() colors : ' .. colors->string())
 
 	enddef
+	static def ColorConfig()
+		if !get(g:, 'ColorsList_Config', false)
+			return
+		endif
+		#设置透明背景
+		Log('ColorConfig')
+		highlight Normal ctermbg=none
+		highlight NonText ctermbg=none
+	enddef
 
 	static def CallBack(id: number, result: any)
 		if result > 1
 			exec "colorscheme " .. colors[result - 1]
+			ColorConfig()
 		endif 
 	enddef
 
