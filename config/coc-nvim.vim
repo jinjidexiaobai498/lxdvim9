@@ -1,9 +1,9 @@
 vim9script
 
 var enable = true
-def CheckBackspace() 
-	let col = col('.') - 1
-	return !col || getline('.')[col - 1]  =~# '\s'
+def CheckBackspace(): bool
+	var col = col('.') - 1
+	return col > 0 || getline('.')[col - 1]  =~# '\s'
 enddef
 
 def ShowDocumentation()
@@ -115,21 +115,6 @@ export def Setup()
 	xmap ac <Plug>(coc-classobj-a)
 	omap ac <Plug>(coc-classobj-a)
 
-	# Remap <C-f> and <C-b> to scroll float windows/popups
-	if has('nvim-0.4.0') || has('patch-8.2.0750')
-		nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-		nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-		inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
-		inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
-		vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-		vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-	endif
-
-	# Use CTRL-S for selections ranges
-	# Requires 'textDocument/selectionRange' support of language server
-	nmap <silent> <C-x> <Plug>(coc-range-select)
-	xmap <silent> <C-x> <Plug>(coc-range-select)
-
 	# Add `:Format` command to format current buffer
 	# Add `:Fold` command to fold current buffer
 	# Add `:OR` command for organize imports of the current buffer
@@ -160,4 +145,19 @@ export def Setup()
 	# Resume latest coc list
 	nnoremap <silent><nowait> <space>lp  :<C-u>CocListResume<CR>
 
+	# Use CTRL-x for selections ranges
+	# Requires 'textDocument/selectionRange' support of language server
+	nmap <silent> <C-x> <Plug>(coc-range-select)
+	xmap <silent> <C-x> <Plug>(coc-range-select)
+
+
+	# Remap <C-f> and <C-b> to scroll float windows/popups
+	if has('nvim-0.4.0') || has('patch-8.2.0750')
+		nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+		nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+		inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+		inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+		vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+		vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+	endif
 enddef

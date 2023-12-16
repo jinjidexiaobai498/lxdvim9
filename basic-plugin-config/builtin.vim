@@ -36,4 +36,4 @@ export def Lazygit()
 	exe '!lazygit'
 enddef
 
-Lazygit()
+#Lazygit()

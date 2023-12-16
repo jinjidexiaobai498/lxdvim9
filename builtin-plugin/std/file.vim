@@ -1,11 +1,13 @@
 vim9script
+import './global.vim' as G
 
+const EORROR_FLAG = 'builtin-plugin-File'
 var debug = false
-def Log(msg: string)
-	if debug
-		echom msg
-	endif
-enddef
+var info = true
+var Log = G.GetLog(debug)
+var Info = G.GetInfo(info)
+var AssertTrue = G.GetAssertTrue(EORROR_FLAG)
+var AssertFalse = G.GetAssertFalse(EORROR_FLAG)
 
 export class File
 	this.path: string
@@ -13,16 +15,17 @@ export class File
 	this.buffer: list<string>
 	this.is_exsited: bool
 	this.len = 0
+	this.sync = true
 	def new(path: string, flag = true)
 
 		var p = expand(path)
 		this.is_exsited = filereadable(p)
 
 		if flag && !this.is_exsited
-			assert_true(['#']->writefile(p, 's') == 0, "Create new file path of " .. path .. "failed")
+			AssertTrue(['#']->writefile(p, 's') == 0, "Create new file path of " .. path .. "failed")
 		endif
 
-		assert_true(this.is_exsited,  "EORROR path doesnot exist, path: " .. path)
+		AssertTrue(this.is_exsited, "EORROR path doesnot exist, path: " .. path)
 
 		this.path = path
 		this.fullpath = p
@@ -30,7 +33,7 @@ export class File
 		this.len = len(this.buffer)
 
 		if flag
-			assert_true(empty(this.buffer) != 1, 'empty of file ' .. this.fullpath)
+			AssertTrue(empty(this.buffer) != 1, 'empty of file ' .. this.fullpath)
 		endif
 
 	enddef
@@ -43,9 +46,26 @@ export class File
 		return this.buffer[idx]->copy()
 	enddef
 
+	def SetLines(lines: list<string>)
+		this.buffer = lines->copy()
+		this.sync = false
+	enddef
+
+	def CheckIndex(idx: number): bool
+		AssertFalse((idx > this.len || idx + this.len <= 0), G.DArgs(idx, 'out of index in object', this))
+		return true
+
+	enddef
+
+	def Insert(idx: number, item: string)
+
+
+	enddef
+
 	def Set(idx: number, str: string)
+		this.sync = false
 		if idx >= this.len
-			this.Append(str)
+			this.buffer->add(str)
 			return
 		endif
 		this.buffer[idx] = str->copy()
@@ -56,43 +76,56 @@ export class File
 	enddef
 
 	def Append(str: string)
+		this.sync = false
 		this.buffer->add(str)
-		assert_true(writefile([str], this.fullpath, 'a') == 0, 'use def Append: failed , Object of' .. this->string())
+		#AssertTrue(writefile([str], this.fullpath, 'a') == 0, 'use def Append: failed , Object of' .. this->string())
 		this.len += 1
 	enddef
 
 	def Remove(idx: number): string
+		this.CheckIndex(idx)
+		this.sync = false
 		var res = this.buffer->remove(idx)
-		assert_true(res->string() != '0', 'def Remove() failed of object' .. this->string())
-		this.Write()
-		Log('res: ' .. res->string())
+		#AssertTrue(res->string() != '0', 'def Remove() failed of object' .. this->string())
+		Log('res: ', res)
 		return res->string()
 	enddef
 
 	def  Write()
-		assert_true(writefile(this.buffer, this.fullpath, 's') == 0, 'use def Write: failed : Object' .. this->string())
+		this.sync = true
+		AssertTrue(writefile(this.buffer, this.fullpath, 's') == 0, 'use def Write: failed : Object' .. this->string())
+	enddef
+
+	def Sync()
+		if !this.sync
+			this.Write()
+		endif
 	enddef
 
 	def GetLines(): list<string>
-		return this.buffer
+		return this.buffer->copy()
 	enddef
 
 	def Print()
 		echom this.buffer->string()
 	enddef
 
-	static def GetParentPath(path: string): string
-		var last_index = path->strridx('/')
-
-		if last_index == 0 
-			return null_string 
-		endif
-
-		return path[ : last_index - 1]
-
-	enddef
 endclass
-def Test()
-#	writefile(['a'], '~/llt.txt', 'p')
+
+def GetParentPath(path: string): string
+	var last_index = path->strridx('/')
+
+	if last_index == 0 
+		return null_string 
+	endif
+
+	return path[ : last_index - 1]
+
 enddef
-#Test()
+
+def Test()
+	#	writefile(['a'], '~/llt.txt', 'p')
+	#AssertTrue(false, 'hello', 'what')
+	#Info('xxx', 'yyy')
+enddef
+Test()

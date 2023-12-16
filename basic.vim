@@ -70,8 +70,8 @@ def BasicOptionConfig()
 	set termguicolors
 
 	#设置透明背景
-	#highlight Normal ctermbg=none
-	#highlight NonText ctermbg=none
+	highlight Normal ctermbg=none
+	highlight NonText ctermbg=none
 
 	set statusline=[%2.10{g:Stl_mode()}]\ %4.100F\ %m%r%h%w%q\ [%1.10{&ff}]\ [%1.20Y]\ %=[NROW:%1.10l,NCOL:%1.10v][%1.3p%%]\ %20{strftime(\"%d/%m/%y\ -\ %H:%M\")}
 
@@ -108,7 +108,7 @@ def BasicOptionConfig()
 	set backspace=2 # 使回格键（backspace）正常处理indent, eol, start等
 	set smartindent # 为C程序提供自动缩进
 
-	set number # 显示行号
+	set nonumber # 显示行号
 	set history=10000 # 历史记录数
 	set ignorecase #搜索忽略大小写
 	set hlsearch 
@@ -136,7 +136,7 @@ def BasicOptionConfig()
 
 	set fillchars=vert:\ ,stl:\ ,stlnc:\  # 在被分割的窗口间显示空白，便于阅读
 
-	#set showmatch # 高亮显示匹配的括号
+	set showmatch # 高亮显示匹配的括号
 	set completeopt=longest,menu #打开文件类型检测, 加了这句才可以用智能补全
 
 	#set matchtime=1 " 匹配括号高亮的时间（单位是十分之一秒）
@@ -152,10 +152,14 @@ def BasicKeymap()
 	# 回车即选中当前项
 	inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"             
 	inoremap <expr> <Tab>  pumvisible() ? "\<C-y>" : "\<Tab>"             
+	nnoremap ]b :bnext<CR>
+	nnoremap [b :bpre<CR>
+	nnoremap <leader>b :buffers<CR>:b 
+	nnoremap <leader>w :b#<CR>
 
 	nmap <leader>ee :e $MYVIMRC<cr>
-	nmap <silent> <leader>bn :bn<CR>
-	nmap <silent> <leader>bp :bp<CR>
+	#nmap <silent> <leader>bn :bn<CR>
+	#nmap <silent> <leader>bp :bp<CR>
 	nmap <silent> q :bdelete<CR>
 	nmap <silent> s :w !sudo tee "%"<CR>
 

@@ -1,43 +1,42 @@
 vim9script
 import "../std/session.vim" as session
 import "../std/global.vim" as g
-import "../std/project.vim" as project
-import "../std/file.vim" as file
-import "../std/collections.vim" as col
+import "../std/project.vim" as project import "../std/file.vim" as file import "../std/collections.vim" as col
 var LIST_NAME: string = "list.txt"
 var SESSION_DIR_NAME: string  = "session_histroy"
 var SESSION_DIR: string = g.DATA_DIR .. "/" ..  SESSION_DIR_NAME
 var MENU_LIST_FILE_PATH: string = SESSION_DIR .. "/" .. LIST_NAME
 
-var debug = false
-def Log(msg: string)
-	if debug
-		echom msg
-	endif
-enddef
+var debug = true
+var Log = g.GetLog(debug)
+var AssertTrue = g.GetAssertTrue('Project-Session-List')
 
-export class SessionList
-	#this.session_list: list<session.Session>
+export class SessionList 
 	this.menu_list: file.File
 	this.session_maps: dict<string>
+	this.view_lines: list<string>
+	this.removes: list<number>
+	this.lines: list<string>
+	this.option = {}
 
 	def new()
 		if !isdirectory(SESSION_DIR) 
-			assert_true(mkdir(SESSION_DIR, "p"))
+			AssertTrue(mkdir(SESSION_DIR, "p"))
 		endif
 		if !filereadable(MENU_LIST_FILE_PATH)
-			assert_true(writefile(['# Vim-Session-Project'], MENU_LIST_FILE_PATH, 's') == 0, 'init Session-Project menu-list-file failed')
+			AssertTrue(writefile(['# Vim-Session-Project'], MENU_LIST_FILE_PATH, 's') == 0, 'init Session-Project menu-list-file failed')
 		endif
 		#this.session_list = globpath(SESSION_DIR, "*.vim", 0, 1)
 		this.menu_list = file.File.new(MENU_LIST_FILE_PATH)
+		#this.lines = this.menu_list.GetLines()
 	enddef
 
 	def Save()
 
 		g.CloseNerdTree()
 		var p = project.Project.new()
-		var save_name = TranPathToFilename(p.name)
-		var save_path =  save_name .. "__.vim"
+		var save_path = TranPathToFilename(p.name) .. '.vim'
+
 		Log('save_path: ' .. save_path) 
 
 		var ses = session.Session.new(save_path, SESSION_DIR)
@@ -46,7 +45,9 @@ export class SessionList
 
 		if !this.menu_list.ContainsLine(save_path)
 			this.menu_list.Append(save_path)
+			defer this.menu_list.Sync()
 		endif
+
 
 	enddef
 
@@ -59,69 +60,119 @@ export class SessionList
 			assert_true(delete(path) == 0, 'def Remove failed in delete file, of object' .. this->string())
 		endif
 		return filename
-		#return null_string
+	enddef
+
+	def Sync()
+
+
+
+	enddef
+
+	def Filter(winid: number, key: string): bool
+		if key == 'r'
+			win_execute(winid, '@l = line(".")')
+			var lnum = str2nr(@l) 
+
+			if lnum == 1 
+				return true
+			endif
+
+
+			var idx = lnum - 1
+			@l = (lnum)->string()
+			var ip = this.removes->index(idx)
+
+			if ip != -1
+				@t = this.view_lines[idx]
+				this.removes->remove(ip)
+			else
+				@t = '[x]' .. this.view_lines[idx]
+				this.removes->add(idx)
+			endif
+
+			win_execute(winid, 'setline(str2nr(@l), @t)')
+
+			Log('lnum: ', lnum)
+			Log('this.removes:', this.removes)
+
+			return true
+
+		elseif key == 'q'
+			popup_close(winid, -1)
+			return true
+		else
+			return popup_filter_menu(winid, key)
+		endif
+	enddef
+
+	def Callback(winid: number, result: any)
+
+		Log('callback result:', result)
+
+		var idx = result - 1
+		if idx > 0 && idx < len(this.lines) && this.removes->index(idx) == -1
+			Log('idx: ', idx)
+			Log('this.lines: ', this.lines)
+
+			var path = SESSION_DIR .. "/" .. this.lines[idx]
+			if !filereadable(path)
+				echom " path does not exists :" .. path
+				this.removes->add(idx)
+			else
+				exec "source " .. path
+			endif
+		endif
+
+		if result != -1
+			this.Sync()
+		endif
+
+	enddef
+
+	def SyncDispLines(): number
+		var disp_lines = this.menu_list.GetLines()
+		var i = 0
+		var len = len(disp_lines)
+		var maxwidth = 0
+		while i < len
+			disp_lines[i] = TranFilenameToPath(disp_lines[i])
+			var tl = len(disp_lines[i])
+			maxwidth = tl > maxwidth ? tl : maxwidth
+			i += 1
+		endwhile
+		this.view_lines = disp_lines
+		Log('disp_lines: ', this.view_lines)
+		return maxwidth
 	enddef
 
 	def PopupBrowser()
 
-		Log('Start PopupBrowser-------')
-		var disp_lines = this.menu_list.GetLines()->copy()
-		var i = 0
-		var len = len(disp_lines)
-		while i < len
-			disp_lines[i] = substitute(disp_lines[i], '__', '/', 'g')
-			i += 1
-		endwhile
-
-		Log('disp_lines: ' .. disp_lines->string())
-
-		var lines = this.menu_list.GetLines()
+		this.lines = this.menu_list.GetLines()
+		var maxwidth = this.SyncDispLines()
 
 		var winid = popup_menu(disp_lines, {
-			callback: (_, result) => {
-				if result > 1
-					var path = SESSION_DIR .. "/" .. lines[result - 1]
-					if !filereadable(path)
-						var idx = result - 1
-						Log(" Remove idx: " .. idx->string()) 
-						this.Remove(result - 1)
-					else
-						exec "source " .. path
-					endif
-				endif
-			},
-			filter: (id, key) => {
-				if key == 'q'
-					popup_close(id, 0)
-				else
-					popup_filter_menu(id, key)
-				endif
-				return true
-			}
+			maxheight: 100,
+			minheight: 5,
+			maxwidth: 200,
+			minwidth: maxwidth + 3,
+			callback: this.Callback,
+			filter: this.Filter
 		})
+
 		win_execute(winid, 'setlocal cursorline')
 	enddef
 
-	def TestDefault()
-		popup_menu(['111', '222', '3333'], {
-			callback: (_, result) => {
-				echom 'dialog ' .. result
-			},
-			filter: (id, key) => {
-				return popup_filter_menu(id, key)
-			}
-		})
-	enddef
-
-	static def TranPathToFilename(path: string): string
-		var old_magic = &magic
-		&magic = 0
-		var ss = substitute(path, '/', '__', 'g') 
-		&magic = old_magic
-		return ss
-	enddef
 
 endclass
+
+export def TranFilenameToPath(str: string): string
+	return substitute(str, '%', '', 'g')
+enddef
+
+def TranPathToFilename(path: string): string
+	return fnameescape(substitute(path, '/', '%', 'g'))
+enddef
+
 
 #Test3()
 export def PopupBrowser(psl: SessionList)
@@ -140,9 +191,16 @@ export def Setup()
 	nmap <Plug>PSLSave :call <SID>Save(g:session_list_vim)<CR>
 enddef
 
-def TestList()
+def TestSave()
 	var sl = SessionList.new()
 	sl.Save()
+	sl.SyncDispLines()
+	echom sl->string()
+enddef
+
+def TestList()
+	var sl = SessionList.new()
+	#sl.Save()
 	sl.PopupBrowser()
 enddef
 
@@ -155,3 +213,12 @@ def Test2()
 	:redir END
 	echom oldfiles->string()->split('\n')
 enddef
+
+def Test3()
+	echom TranPathToFilename('/home/lxd/tags')
+enddef
+
+#Test3()
+#TestList()
+TestSave()
+

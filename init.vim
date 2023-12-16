@@ -7,16 +7,17 @@ import './global.vim' as G
 G.InstallPlugVim()
 
 import './basic.vim' as basic
+basic.Setup()
+
 import "./basic-plugin.vim" as basic_plugin 
-import './event.vim' as event
+basic_plugin.Setup()
+
 import './plugin.vim' as plugin
+plugin.Setup()
 
-export def Setup()
-	basic.Setup()
-	basic_plugin.Setup()
-	event.Setup()
-	plugin.Setup()
-enddef
+import './event.vim' as event
+event.Setup()
 
-Setup()
+import './basic-plugin-config/builtin.vim' as builtin
+builtin.Setup()
 

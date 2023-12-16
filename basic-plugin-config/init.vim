@@ -7,7 +7,7 @@ import './nerdcommenter.vim' as ndc
 import './tagbar.vim' as tg
 import './vim-surround.vim' as vsr
 import './vim-which-key.vim' as wk
-import './builtin.vim' as builtin
+#import './builtin.vim' as builtin
 
 export def Setup()
 	ft.Setup()
@@ -17,5 +17,5 @@ export def Setup()
 	tg.Setup()
 	vsr.Setup()
 	wk.Setup()
-	builtin.Setup()
+	#builtin.Setup()
 enddef

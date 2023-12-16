@@ -2,7 +2,7 @@ vim9script
 export def Setup()
 
 	#find  in current buffer 
-	nmap <leader>fl :BLines<CR> 
+	nmap <leader>fl :Lines<CR> 
 	nmap <leader>ft :BTag<CR>
 
 	#find in  work direcotry
@@ -10,7 +10,10 @@ export def Setup()
 	nmap <leader>fb :Buffers<CR>
 	nmap <leader>fT :Tags<CR>
 	nmap <leader>ff :Files<CR> 
-	nmap <leader>fL :Lines<CR>
+
+	if executable('rg')
+		nmap <leader>fL :RG<CR>
+	endif
 
 	# find by word under current cursor 
 	nmap <leader>fs :execute ":BTag " . expand('<cword>')<CR>
@@ -20,8 +23,13 @@ export def Setup()
 
 	nmap <C-p> :Maps<CR>
 
-	#nmap ,f :Files<CR>
+	nmap ,f :Files<CR>
 	nmap ,l :Lines<CR>
 	nmap ,b :Buffers<CR>
+	nmap ,r :History<CR>
+
+	if executable('rg')
+		nmap ,L :RG<CR>
+	endif
 
 enddef
