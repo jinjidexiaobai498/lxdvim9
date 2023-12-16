@@ -39,10 +39,11 @@ def ProjectFindFile()
 	var p = project.Project.new()
 	exe 'Files ' .. p.project_path
 enddef
+
 def ProjectRg()
 	var p = project.Project.new()
 	exe 'lcd ' .. p.project_path
 	exe 'RG'
 enddef
 
-ProjectRg()
+#ProjectRg()

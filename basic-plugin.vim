@@ -9,7 +9,7 @@ def Log(msg: string)
 	endif
 enddef
 
-def BasicPluginLoad()
+export def BasicPluginLoad()
 
 	#var basc_plugins =
 	call plug#begin("~/.vim/plugged")
@@ -48,10 +48,6 @@ def BasicPluginLoad()
 	endif
 enddef
 
-import './basic-plugin-config/init.vim' as basic_config
-
 export def Setup()
 	BasicPluginLoad()
-	basic_config.Setup()
-	#PluginLoad()
 enddef

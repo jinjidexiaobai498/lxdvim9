@@ -1,26 +1,52 @@
 vim9script
-###################events#####################
 
-#定义函数SetTitle，自动插入文件头"
+var YOUR_NAME = get(g:, 'AuthorName', 'xxx')
+var YOUR_BLOG = get(g:, 'AuthorBlog', 'xxx')
+var TIME_FORMAT = get(g:, 'AuthorTimeFormat', '%Y 年 %b %d日 %X')
+
+const BASHES = {'sh': true, 'bash': true, 'zsh': true}
+
+var lnum = 1
+
+def Append(str: string)
+	lnum = (lnum > 0 ? lnum : 1)
+	setline(lnum, str)
+	lnum += 1
+enddef
+
+def NormalTitle(comment: string = '//')
+	Append(comment .. "Author: " .. YOUR_NAME)
+	Append(comment .. "Time: " .. strftime(TIME_FORMAT))
+	Append(comment .. "Blog: " .. YOUR_BLOG)
+	Append(comment .. "FileName: " .. expand('%:p'))
+enddef
+
+# 定义函数SetTitle，自动插入文件头"
 def SetTitle()
-	if expand ("%:e") == 'sh'
-		call setline(1, "#!/bin/bash")
-		call setline(2, "#Author:LvXudong")
-		call setline(3, "#Time:".strftime("%Y 年 %b %d日 %X"))
-		call setline(4, "#Name:".expand("%"))
-		call setline(5, "#Version:V1.0")
-		call setline(6, "#Description:This is a production script.")
-	elseif expand ("%:e") == 'cpp' || expand ("%:e") == 'c' 
-		call setline(1, "//Author:LvXuDong")
-		call setline(2, "//Blog:lxd_ls")
-		call setline(3, "//Time:".strftime("%Y 年 %b %d日 %X"))
-		call setline(4, "//Name:".expand("%")) 
+	var ext = expand('%:e')
+	lnum = 1
 
+	if BASHES->has_key(ext)
+		Append( "#!" .. &shell)
+		NormalTitle('#')
+	elseif ext == 'cpp'
+		NormalTitle('//')
+		Append( '#include <iostream>')
+		Append( '#include <vector>')
+		Append( 'using namespace std;')
+		Append( 'int main()')
+		Append( '{')
+		Append( '	cout<<"hello wolrd!";')
+		Append( '}')
+	elseif ext == 'c'
+		NormalTitle('//')
+		Append('#include <stdio.h>')
+		Append('int main()')
+		Append( '{')
+		Append( '	printf("hello wolrd!");')
+		Append( '}')
 	else
-		call setline(1, "//Author:LvXuDong")
-		call setline(2, "//Blog:lxd_ls")
-		call setline(3, "//Time:".strftime("%Y 年 %b %d日 %X"))
-		call setline(4, "//Name:".expand("%")) 
+		NormalTitle()
 	endif
 
 enddef
@@ -35,7 +61,7 @@ export def Setup()
 
 	augroup SetTitle
 		au!
-		autocmd BufNewFile *.py,*.cc,*.sh,*.java,*.cpp,*.c exec call SetTitle()
+		autocmd BufNewFile *.py,*.cc,*.sh,*.zsh,*.bash,*.java,*.cpp,*.c SetTitle()
 	augroup END
 
 enddef

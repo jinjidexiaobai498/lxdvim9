@@ -41,7 +41,7 @@ export class Project
 		endwhile
 
 		if this.project_path == null_string
-			this.project_path = this.filename
+			this.project_path = this.file_path
 			this.type = 'SingleFile'
 		endif
 	enddef

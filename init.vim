@@ -12,8 +12,14 @@ basic.Setup()
 import "./basic-plugin.vim" as basic_plugin 
 basic_plugin.Setup()
 
+import './basic-plugin-config/init.vim' as basic_config
+basic_config.Setup()
+
 import './plugin.vim' as plugin
 plugin.Setup()
+
+import './config/init.vim' as config
+config.Setup()
 
 import './event.vim' as event
 event.Setup()

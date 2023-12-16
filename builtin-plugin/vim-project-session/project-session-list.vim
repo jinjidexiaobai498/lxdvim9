@@ -8,7 +8,7 @@ var LIST_NAME: string = "list.txt"
 var SESSION_DIR_NAME: string  = "session_histroy"
 var SESSION_DIR: string = g.DATA_DIR .. "/" ..  SESSION_DIR_NAME
 var MENU_LIST_FILE_PATH: string = SESSION_DIR .. "/" .. LIST_NAME
-var debug = true
+var debug = false
 var Log = g.GetLog(debug)
 var AssertTrue = g.GetAssertTrue('Project-Session-List')
 
@@ -221,20 +221,6 @@ def TestList()
 enddef
 
 #g:Test = TestList
-
-def Test2()
-	var oldfiles = ''
-	:redir => oldfiles
-	exe 'oldfiles'
-	:redir END
-	echom oldfiles->string()->split('\n')
-enddef
-
-def Test3()
-	echom TranPathToFilename('/home/lxd/tags')
-enddef
-
-#Test3()
 #TestList()
 #TestSave()
 
