@@ -1,15 +1,12 @@
 vim9script
 &encoding = 'utf-8'
 import "./global.vim" as G
+import './builtin-plugin/std/global.vim' as utils
 
 var debug = false
-def Log(msg: string)
-	if debug
-		echom msg
-	endif
-enddef
+var Log = utils.GetLog(debug)
 
-export def BasicPluginLoad()
+def BasicPluginLoad()
 
 	#var basc_plugins =
 	call plug#begin("~/.vim/plugged")
@@ -18,9 +15,7 @@ export def BasicPluginLoad()
 	G.PlugGlobalAdd('junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }) 
 	G.PlugGlobalAdd('junegunn/fzf.vim') 
 
-	G.PlugGlobalAdd('scrooloose/nerdtree') 
-
-	# Class/module browser
+	G.PlugGlobalAdd('scrooloose/nerdtree') # Class/module browser
 	G.PlugGlobalAdd('majutsushi/tagbar') 
 
 	G.PlugGlobalAdd('fisadev/FixedTaskList.vim') 

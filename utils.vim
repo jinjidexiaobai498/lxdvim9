@@ -49,13 +49,3 @@ export def Log(...msgs: list<any>)
 	echom s
 enddef
 
-
-import './global.vim' as G
-def Test()
-	var LLog = GetLog(true)
-	LLog("vim_plug_path: ", G.VIM_PLUG_PATH)
-	LLog("vim_data_path: ", G.VIM_DATA_PATH)
-enddef
-
-
-#Test()

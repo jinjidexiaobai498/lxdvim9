@@ -1,9 +1,8 @@
 vim9script
-export const USE_NEOVIM = has('nvim')
-export const USE_VIM = !USE_NEOVIM
-export const VIM_DATA_PATH = USE_NEOVIM ? stdpath('data') : expand('~/.vim')
-export const VIM_PLUG_PATH = USE_NEOVIM ? expand('~/.config/nvim/autoload/plug.vim') : VIM_DATA_PATH .. "/autoload/plug.vim"
-export var BASIC_PLUGIN_LIST: list<any> = null_list
+const VIM_DATA_PATH = expand('~/.vim')
+const VIM_PLUG_PATH = VIM_DATA_PATH .. "/autoload/plug.vim"
+
+var BASIC_PLUGIN_LIST: list<any> = null_list
 
 export def GetIsExtendInstalledPlugins(): bool
 	return isdirectory(VIM_DATA_PATH .. '/plugged/coc.nvim/.git')
@@ -14,8 +13,8 @@ export def GetIsBasicInstalledPlugins(): bool
 enddef
 
 
-import './utils.vim' as utils
-export var debug = false
+import './builtin-plugin/std/global.vim' as utils
+var debug = false
 
 var Log = utils.GetLog(debug)
 

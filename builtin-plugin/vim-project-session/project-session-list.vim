@@ -8,7 +8,7 @@ var LIST_NAME: string = "list.txt"
 var SESSION_DIR_NAME: string  = "session_histroy"
 var SESSION_DIR: string = g.DATA_DIR .. "/" ..  SESSION_DIR_NAME
 var MENU_LIST_FILE_PATH: string = SESSION_DIR .. "/" .. LIST_NAME
-var debug = false
+var debug = true
 var Log = g.GetLog(debug)
 var AssertTrue = g.GetAssertTrue('Project-Session-List')
 
@@ -49,17 +49,6 @@ export class SessionList
 			defer this.menu_list.Sync()
 		endif
 
-	enddef
-
-	def Remove(idx: number): string
-		var filename = this.menu_list.Remove(idx)
-		Log('Removed filename: ' .. filename)
-		var path = SESSION_DIR .. '/' .. filename
-		Log("path of session.vim to save: " .. path)
-		if filereadable(path)
-			assert_true(delete(path) == 0, 'def Remove failed in delete file, of object' .. this->string())
-		endif
-		return filename
 	enddef
 
 	def Sync()
@@ -128,7 +117,7 @@ export class SessionList
 			Log('idx: ', idx)
 			Log('this.lines: ', this.lines)
 
-			var path = SESSION_DIR .. "/" .. this.lines[idx]
+			var path = fnameescape(SESSION_DIR .. "/" .. this.lines[idx]->substitute('\', '', 'g'))
 			if !filereadable(path)
 				echom " path does not exists :" .. path
 				this.removes->add(idx)
@@ -189,8 +178,6 @@ def TranPathToFilename(path: string): string
 	return fnameescape(substitute(path, '/', '%', 'g'))
 enddef
 
-
-#Test3()
 export def PopupBrowser(psl: SessionList)
 	Log('start popupbrowser ....')
 	psl.PopupBrowser()
@@ -221,6 +208,6 @@ def TestList()
 enddef
 
 #g:Test = TestList
-#TestList()
+TestList()
 #TestSave()
 
