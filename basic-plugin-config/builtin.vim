@@ -16,6 +16,7 @@ export def Setup()
 	nmap ,p <Plug>PSLPopupBrowser
 	nmap ,c <Plug>ColorsPopupBrowser
 	nmap ,r <Plug>RecentFiles
+	nmap ,F <Plug>FZFFunctions
 
 	nmap <leader>sc <Plug>ColorsSync
 	nmap <leader>ss <Plug>PSLSave
@@ -23,6 +24,7 @@ export def Setup()
 	nmap <leader>th <Plug>HortTerminalToggle
 	nmap <leader>tv <Plug>VertTerminalToggle
 
+	nmap <leader>fd <Plug>FZFFunctions
 
 	nmap <C-\> <Plug>VertTerminalToggle
 	nmap <C-l> <Plug>HortTerminalToggle

@@ -10,7 +10,7 @@ export def Setup()
 	nmap <leader>fc :Colors<CR>
 	nmap <leader>fb :Buffers<CR>
 	nmap <leader>fT :Tags<CR>
-	nmap <leader>ff :Files<CR> 
+	nmap <leader>ff :call <SID>ProjectFindFile()<CR>
 
 	if executable('rg')
 		nmap <leader>fL :call <SID>ProjectRg()<CR>
