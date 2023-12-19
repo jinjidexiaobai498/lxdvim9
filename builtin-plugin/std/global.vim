@@ -39,31 +39,34 @@ export def AssertTrue(expr: bool, ...msgs: list<any>)
 	throw 'UserPlugin'
 enddef
 
-export def DArgs(...msgs: list<any>): string
-	var s = ''
-	for i in msgs
-		s ..= ' '
-		if type(i) != 1
-			s ..= i->string()
-		else
-			s ..= i
-		endif
-	endfor
-	return s
+export def CntArgs(...msgs: list<any>): string
+	return join(msgs)
+	#var s = ''
+	#for i in msgs
+		#s ..= ' '
+		#if type(i) != 1
+			#s ..= i->string()
+		#else
+			#s ..= i
+		#endif
+	#endfor
+	#return s
 enddef
 
 
 export def Args(msgs: list<any>): string
-	var s = ''
-	for i in msgs
-		s ..= ' '
-		if type(i) != 1
-			s ..= i->string()
-		else
-			s ..= i
-		endif
-	endfor
-	return s
+	return join(msgs)
+
+	#var s = ''
+	#for i in msgs
+		#s ..= ' '
+		#if type(i) != 1
+			#s ..= i->string()
+		#else
+			#s ..= i
+		#endif
+	#endfor
+	#return s
 enddef
 
 export def FlagInfo(flag: bool, ...msgs: list<string>)
@@ -77,12 +80,12 @@ export def Info(...msgs: list<string>)
 	echom Args(msgs)
 enddef
 
-export def GetInfo(flag: bool): func
-	return funcref(FlagInfo, [flag])->copy()
+export def GetInfo(flag: bool, ...pre_msgs: list<any>): func
+	return funcref(FlagInfo, [flag, pre_msgs])->copy()
 enddef
 
-export def GetLog(flag: bool): func
-	return funcref(FlagLog, [flag])->copy()
+export def GetLog(flag: bool, ...pre_msgs: list<any>): func
+	return funcref(FlagLog, [flag, pre_msgs])->copy()
 enddef
 
 def FlagLog(flag: bool, ...msgs: list<any>)
@@ -111,5 +114,16 @@ export def CloseNerdTree()
 	endfor
 enddef
 
-Log('SELF_PATH:', SELF_PATH)
+export var SHELL_LIST = ['/bin/zsh', '/bin/bash', '/bin/sh']
+export def GetShell(): string
+	for s in SHELL_LIST
+		if executable(s)		
+			return s->copy() 
+		endif
+	endfor
+	return &shell
+enddef
+
+
+#Log('SELF_PATH:', SELF_PATH)
 

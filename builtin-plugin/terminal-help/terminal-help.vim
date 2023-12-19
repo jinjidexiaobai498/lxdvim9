@@ -1,4 +1,9 @@
 vim9script noclear
+
+import '../std/global.vim' as G
+
+var debug = false
+var Log = G.GetLog(debug)
 const SHELL_LIST = ['/bin/zsh', '/bin/bash', '/bin/sh']
 
 def GetShell(): string
@@ -22,12 +27,6 @@ def Config_local_terminal()
 	#autocmd WinEnter *[终端] <buffer> if mode() != 't' | exe "normal! i" endif
 enddef
 
-var debug = false
-def Log(msg: string)
-	if debug
-		echom msg
-	endif
-enddef
 
 def TerminalClose(bufnr: number): bool
 

@@ -8,7 +8,7 @@ var LIST_NAME: string = "list.txt"
 var SESSION_DIR_NAME: string  = "session_histroy"
 var SESSION_DIR: string = g.DATA_DIR .. "/" ..  SESSION_DIR_NAME
 var MENU_LIST_FILE_PATH: string = SESSION_DIR .. "/" .. LIST_NAME
-var debug = true
+var debug = false
 var Log = g.GetLog(debug)
 var AssertTrue = g.GetAssertTrue('Project-Session-List')
 
@@ -19,7 +19,24 @@ export class SessionList
 	this.removes: list<number>
 	this.lines: list<string>
 	this.is_sync = true
-	this.option = {}
+	this.popup_option = null_dict
+
+	def DefaultPopup(): dict<any>
+		if this.popup_option != null_dict
+			return this.popup_option->copy()
+		endif
+		var opt = {}
+		opt.maxheight = 100
+		opt.minheight = 5
+		opt.maxwidth = 200
+		opt.minwidth = 20
+		opt.callback = this.Callback
+		opt.filter = this.Filter
+		this.popup_option = opt
+		return this.popup_option->copy()
+
+	enddef
+
 
 	def new()
 		if !isdirectory(SESSION_DIR) 
@@ -117,12 +134,13 @@ export class SessionList
 			Log('idx: ', idx)
 			Log('this.lines: ', this.lines)
 
-			var path = fnameescape(SESSION_DIR .. "/" .. this.lines[idx]->substitute('\', '', 'g'))
+			var path = [SESSION_DIR, (this.lines[idx])->substitute('\', '', 'g')]->join('/')
+			Log('path:', path)
 			if !filereadable(path)
 				echom " path does not exists :" .. path
 				this.removes->add(idx)
 			else
-				exec "source " .. path
+				exec "source " .. fnameescape(path)
 			endif
 		endif
 
@@ -155,14 +173,9 @@ export class SessionList
 		this.lines = this.menu_list.GetLines()
 		var maxwidth = this.SyncDispLines()
 
-		var winid = popup_menu(this.view_lines, {
-			maxheight: 100,
-			minheight: 5,
-			maxwidth: 200,
-			minwidth: maxwidth + 3,
-			callback: this.Callback,
-			filter: this.Filter
-		})
+		var opt = this.DefaultPopup()
+		opt.minwidth = maxwidth + 3
+		var winid = popup_menu(this.view_lines, opt)
 
 		win_execute(winid, 'setlocal cursorline')
 	enddef
@@ -208,6 +221,6 @@ def TestList()
 enddef
 
 #g:Test = TestList
-TestList()
+#TestList()
 #TestSave()
 

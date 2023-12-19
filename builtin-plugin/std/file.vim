@@ -1,13 +1,14 @@
 vim9script
 import './global.vim' as G
 
-const EORROR_FLAG = 'builtin-plugin-File'
+const EORROR_FLAG = 'builtin-plugin-File:'
+const __FILE__ = expand('<sfile>')
 var debug = false
 var info = true
-var Log = G.GetLog(debug)
+var Log = G.GetLog(debug, __FILE__)
 var Info = G.GetInfo(info)
-var AssertTrue = G.GetAssertTrue(EORROR_FLAG)
-var AssertFalse = G.GetAssertFalse(EORROR_FLAG)
+var AssertTrue = G.GetAssertTrue(__FILE__ .. EORROR_FLAG)
+var AssertFalse = G.GetAssertFalse(__FILE__ .. EORROR_FLAG)
 
 export class File
 	this.path: string
@@ -52,7 +53,7 @@ export class File
 	enddef
 
 	def CheckIndex(idx: number): bool
-		AssertFalse((idx > this.len || idx + this.len <= 0), G.DArgs(idx, 'out of index in object', this))
+		AssertFalse((idx > this.len || idx + this.len <= 0), G.CntArgs(idx, 'out of index in object', this))
 		return true
 
 	enddef
@@ -124,8 +125,7 @@ def GetParentPath(path: string): string
 enddef
 
 def Test()
-	#	writefile(['a'], '~/llt.txt', 'p')
-	#AssertTrue(false, 'hello', 'what')
-	#Info('xxx', 'yyy')
+	var LL = G.GetLog(true, __FILE__, 'lxd')
+	LL('help')
 enddef
 #Test()
