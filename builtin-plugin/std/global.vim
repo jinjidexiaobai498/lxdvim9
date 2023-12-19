@@ -124,6 +124,13 @@ export def GetShell(): string
 	return &shell
 enddef
 
+export def OR(...obs: list<any>): any
+	for i in obs
+		if !(!(i))
+			return i
+		endif
+	endfor
+	return null
+enddef
 
 #Log('SELF_PATH:', SELF_PATH)
-

@@ -94,7 +94,7 @@ export class File
 
 	def  Write()
 		this.sync = true
-		AssertTrue(writefile(this.buffer, this.fullpath, 's') == 0, 'use def Write: failed : Object' .. this->string())
+		AssertTrue((writefile(this.buffer, this.fullpath, 's') == 0), 'use def Write: failed : Object', this->string())
 	enddef
 
 	def Sync()

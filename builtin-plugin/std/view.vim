@@ -16,24 +16,27 @@ export class View
 	this.is_view: bool = false
 	this.is_check: bool = false
 	this.is_sync: bool = false
-	public this.Show: func
-	#public this.Close: func
-	public this.Hidden: func
+	public this.WindowLayoutOpen: func
+	public this.WindowLayoutHidden: func
 
 	def Sync()
 		if !this.is_sync
 			this.winnr = bufwinnr(this.bufnr)
-			this.is_view = this.winnr > 0 ? true : false
+			this.is_view = (this.winnr > 0)
 			this.is_sync = true
 		endif
 	enddef
 
 	static MSG_BUF_UNLOADED = 'bufnr doesnot exist or unloaded, bufnr:'
 
-	def new(this.bufnr)
-		AssertTrue(bufexists(this.bufnr), MSG_BUF_UNLOADED, this.bufnr )
-		this.name = bufname(this.bufnr)
-		AssertTrue(!empty(this.name))
+	def new(bufnr: number = -1)
+		this.bufnr = bufnr
+		this.WindowLayoutOpen = G.OR(this.WindowLayoutOpen, this.DefaultWindowLayoutOpen)
+		this.WindowLayoutHidden = G.OR(this.WindowLayoutHidden, this.DefaultWindowLayoutHidden)
+	enddef
+
+	def SetBufnr(bufnr: number)
+		this.bufnr = bufnr
 	enddef
 
 	def EndLine()
@@ -51,61 +54,81 @@ export class View
 	def IsExists(): bool
 		if !this.is_check
 			this.is_check = true
-			return (bufexists(this.bufnr) && !empty(bufname(this.bufnr)))
+			return BufExists(this.bufnr)
 		else
 			return true
 		endif
 	enddef
 
-	def DefaultShow()
-		this.Sync()
-		exec 'b ' .. this.bufnr
+	def DefaultWindowLayoutOpen()
 	enddef
 
-	def DefaultHidden()
-		Log('DefaultHidden')
+	static def DefaultWindowLayoutHidden()
+		Log('DefaultWindowLayoutHidden')
 		exec 'b ' .. expand('#')
-		#this.EndLine()
 	enddef
 
-	def Toggle()
+	def ExposeCall(Fn: func)
+		defer this.EndLine()
 		if !this.IsExists()
 			Info(MSG_BUF_UNLOADED, this.bufnr)
-			this.EndLine()
 			return
 		endif
 		this.Sync()
-		if this.is_view
-			Log('this.winnr:', this.winnr)
-			
-			var cwinid = win_getid()
-			var winid = win_getid(this.winnr)
-			if winid != cwinid
-				win_gotoid(winid)
-			endif
-			if !this.Hidden
-				this.DefaultHidden()
-			else
-				this.Hidden()
-			endif
-			if cwinid != win_getid()
-				win_gotoid(cwinid)
-			endif
-		else
-			if !this.Show
-				this.DefaultShow()
-			else
-				this.Show()
-			endif
-		endif
-		this.EndLine()
+		Fn()
 	enddef
 
+	def Toggle()
+		this.ExposeCall(this.InnerToggle)
+	enddef
+
+	def InnerToggle()
+		if this.is_view
+			Log('this.winnr:', this.winnr)
+
+			var _cwinid = win_getid()
+			var _winid = win_getid(this.winnr)
+
+			if _winid != _cwinid
+				win_gotoid(_winid)
+			endif
+			this.WindowLayoutHidden()
+			if _cwinid != win_getid()
+				win_gotoid(_cwinid)
+			endif
+		else
+			this.WindowLayoutOpen()
+			exe 'b ' .. this.bufnr
+		endif
+
+	enddef
+
+
 endclass
+
+export def DefaultWindowLayoutHidden()
+	try
+		close
+	catch /^Vim\%((\a\+)\)\=:E444:/
+		exe 'vs'
+		var winnr = winnr() + 1
+		exe 'e 1'
+		exe winnr .. 'close'
+	endtry
+enddef
+
+export def BufExists(bufnr: number): bool
+	return (bufexists(bufnr) && !empty(bufname(bufnr)))
+enddef
 
 def Test()
 	var v = View.new(1)
 	g:ITest = () => v.Toggle()
 	nmap <leader>tt :call g:ITest()<CR>
+
 enddef
-#Test()
+def Test2()
+	echom G.OR(null_function, 'string')
+	echom !v:none
+enddef
+#Test2()

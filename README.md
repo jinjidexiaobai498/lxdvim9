@@ -1,5 +1,10 @@
 # like Spacevim but write in vim9script
 
+## Require
+
+1. only vim 9.0 ++
+2. only linux now
+
 ##  install
 ```bash
 git clone https://github.com/jinjidexiaobai498/lxdvim9 ~/.config/vim/lxdvim9 --depth 1
@@ -30,7 +35,13 @@ and some built-in plugins which are written by myself
 
 - coc-nvim
 
-default do not use extend plugins 
+> open by add *g:lxdvim_extend_plug = true* in your vimrc 
 
-g:lxdvim\_extend\_plug = false
+default do not use extend plugins
+
+## default config options
+
+```vim
+g:lxdvim_extend_plug = false
+```
 
