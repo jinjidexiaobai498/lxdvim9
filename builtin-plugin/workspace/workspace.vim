@@ -1,5 +1,4 @@
 vim9script
-
 import '../std/global.vim' as G
 import '../std/view.vim' as view
 import '../std/project.vim' as project
@@ -7,8 +6,8 @@ var debug = true
 var Log = G.GetLog(debug)
 var info = true
 var Info = G.GetLog(info)
-
 const BUF_NAME_PREFIX = '___WorkSpace___'
+const INDENT_SPACE = '  '
 
 const ItemType = {
 	SingleFile: 0,
@@ -52,7 +51,47 @@ class WorkSpace
 	def ConfigLocalBuf()
 		setlocal nonumber norelativenumber signcolumn=no
 		setlocal bufhidden=hide
-		#setlocal nobuflisted
+		setlocal nobuflisted
+	enddef
+
+	def Read(bufinfo: dict<any>)
+		var bufnr = bufinfo.bufnr
+		var name = bufinfo.name
+
+		if this.map->has_key(name)
+			this.map[name] = bufnr
+			Log('this.map has store bufinfo.name', name)
+			return
+		endif
+
+		Log('WorkSpace doesnot has this buffer:', bufinfo)
+		this.map[name] = bufnr
+		this.AddProject(name)
+	
+	enddef
+	
+	def AddProject(bufname: string)
+		var p = project.Project.new(bufname)
+
+		if this.project_map->has_key(p.name)
+			this.project_map[p.name].Add(p.filename)
+			return
+		endif
+
+		var item = WorkSpaceItem.new(p)
+		this.Add(item)
+	
+	enddef
+
+	def Abort(bufinfo: dict<any>)
+		var name = bufinfo.name
+		Log('type of this.map', type(this.map))
+
+		if !has_key(this.map, name)
+			return
+		endif
+
+		this.map->remove(name)
 	enddef
 
 	def Clear()
@@ -128,34 +167,13 @@ def CheckBeforeHandler(bufnr: number): dict<any>
 enddef
 
 def HandlerBufRead(bufnr: number)
-	Log(wk)
+	Log('wk :', wk)
 	Log('BufReadPostHandler')
 	var bufinfo = CheckBeforeHandler(bufnr)
 	if bufinfo == null_dict
 		return
 	endif
-
-	var bufnr = bufinfo.bufnr
-	var name = bufinfo.name
-
-	if wk.map->has_key(name)
-		wk.map[name] = bufnr
-		Log('wk.map has store bufinfo.name', name)
-		return
-	endif
-
-	wk.map[name] = bufnr
-
-	var p = project.Project.new(bufname(bufnr))
-
-	if wk.project_map->has_key(p.name)
-		wk.project_map[p.name].Add(p.filename)
-		return
-	endif
-
-	var item = WorkSpaceItem.new(p)
-	wk.Add(item)
-
+	wk.Read(bufinfo)
 enddef
 
 def HandlerBufDelete(bufnr: number)
@@ -168,17 +186,17 @@ def HandlerBufDelete(bufnr: number)
 		return
 	endif
 
-	var name = bufinfo.name
-	Log('type of wk.map', type(wk.map))
-
-	if !has_key(wk.map, name)
-		return
-	endif
-
-	wk.map->remove(name)
-
+	wk.Abort(bufinfo)
 
 enddef
+
+class DisplyBuf
+	this.toplines: list<string> = []
+	this.endlines: list<string> = []
+	this.contents: list<string> = []
+	
+
+endclass
 
 augroup WorkSpaceListenner
 	au!

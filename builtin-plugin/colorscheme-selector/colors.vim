@@ -142,27 +142,6 @@ export def PopupBrowser(cl: ColorsList)
 	cl.PopupBrowser()
 enddef
 
-
-def TestAll()
-	var colors = ColorsList.GetList()
-	popup_menu(colors, {
-		callback: (_, result) => {
-			if result > 1
-				exec "colorscheme " .. colors[result - 1]
-			endif
-		},
-		filter: (id, key) => {
-			if key == 'q'
-				popup_close(id, 0)
-			else
-				popup_filter_menu(id, key)
-			endif
-			return true
-		}
-	})
-
-enddef
-
 def TestPop()
 	#g:_colors_list_ = ColorsList.new()
 	#nmap ,c :call <SID>PopupBrowser(g:_colors_list_)<CR>

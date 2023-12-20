@@ -79,7 +79,7 @@ export def Setup()
 	augroup mygroup
 		autocmd!
 		# Setup formatexpr specified filetype(s)
-		autocmd FileType typescript,json setl formatexpr = g:CocAction('formatSelected')
+		autocmd FileType typescript,json setl formatexpr=g:CocAction('formatSelected')
 		# Update signature help on jump placeholder
 		autocmd User CocJumpPlaceholder call g:CocActionAsync('showSignatureHelp')
 	augroup end
@@ -139,9 +139,9 @@ export def Setup()
 	# Search workspace symbols
 	nnoremap <silent><nowait> <space>ls  :<C-u>CocList -I symbols<cr>
 	# Do default action for next item
-	nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
+	nnoremap <silent><nowait> <space>lj  :<C-u>CocNext<CR>
 	# Do default action for previous item
-	nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
+	nnoremap <silent><nowait> <space>lk  :<C-u>CocPrev<CR>
 	# Resume latest coc list
 	nnoremap <silent><nowait> <space>lp  :<C-u>CocListResume<CR>
 
