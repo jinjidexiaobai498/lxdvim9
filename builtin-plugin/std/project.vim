@@ -10,12 +10,20 @@ var LANGUIAGE_MAP = {'c': "c", "cpp": 'cpp', 'py': 'python', 'rs': 'rust', 'md':
 var debug = false
 var Log = G.GetLog(debug)
 
+const ProjectType = {
+	SingleFile: 0,
+	Project: 1
+}
+
+const ProjectTypeDecode = ['SingleFile', 'Project']
+
 export class Project
 	#TODO finish multi times mem buffer
 	#static workdir_buffer_map: dict<string>
 	public this.file_path: string = null_string
 	public this.project_path: string = null_string
-	public this.type: string = null_string
+	public this.type: number
+	public this.type_name: string
 	public this.filename: string = null_string
 	def new(path = null_string)
 		this.filename = fnamemodify(expand(path == null_string ? '%' : path->copy()), ':p')
@@ -28,7 +36,8 @@ export class Project
 			for i in PROJECT_LABLE->keys()
 				if subs->index(i) != -1 
 					this.project_path = p->copy()
-					this.type = PROJECT_LABLE->get(i, 'NONE')
+					this.type_name = PROJECT_LABLE->get(i, 'NO_LABLE_PROJECT')
+					this.type = ProjectType.Project
 					p = null_string
 					break
 				endif
@@ -42,7 +51,8 @@ export class Project
 
 		if this.project_path == null_string
 			this.project_path = this.file_path
-			this.type = 'SingleFile'
+			this.type = ProjectType.SingleFile
+			this.type_name = 'SINGLE_FILE'
 		endif
 	enddef
 
@@ -61,7 +71,7 @@ enddef
 def TestProject()
 	#var Pj = Project.new("/home/lxd/Downloads/alacritty.yml")
 	var Pj = Project.new()
-	echom Pj.type
+	echom Pj.type_name
 	echom Pj.project_path
 	echom Pj.filename
 enddef

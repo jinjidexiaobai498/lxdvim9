@@ -8,14 +8,41 @@ var Log = G.GetLog(debug)
 var info = true
 var Info = G.GetLog(info)
 
-
 const BUF_NAME_PREFIX = '___WorkSpace___'
+
+const ItemType = {
+	SingleFile: 0,
+	Project: 1
+}
+
+const ProjectTypeDecode = ['SingleFile', 'Project']
+
+class WorkSpaceItem
+	public this.name
+	public this.type: number
+	public this.opened_file_list: list<string>
+
+	def new(p: project.Project)
+		this.name = p.name
+		this.type = p.type
+		this.Add(p.filename)
+	enddef
+
+	def Add(filename: string)
+		if this.type == ItemType.SingleFile
+			return
+		endif
+		this.opened_file_list->add(filename)
+	enddef
+
+endclass
+
 
 
 class WorkSpace
 	static ID = 0
-	this.map: dict<number> = {}
-	this.list: list<any> = []
+	public this.map: dict<number> = {}
+	public this.list: list<WorkSpaceItem> = []
 	this._view: view.View
 	this.bufnr: number = -1
 	this.is_init = false
@@ -76,32 +103,12 @@ class WorkSpace
 		this.WindowLayoutOpen = G.OR(WindowLayoutOpen, DefaultWindowLayoutOpen)
 	enddef
 
-
-endclass
-
-enum ItemType
-	SingleFile
-	Project
-endenum
-
-class WorkSpaceItem
-	public this.name
-	public this.type: ItemType
-	public this.opened_file_list: list<string> = []
-	def new(p: project.Project)
-		this.name = p.name
-		if this.type == 'SingleFile'
-
-			return
-		endif
-		this.opened_file_list->add(p.filename)
-	enddef
-	def Add(name: string)
-		if this.type ==  
+	def Add(item: WorkSpaceItem)
+		this.project_map[item.name] = item
 	enddef
 
-endclass
 
+endclass
 var wk = WorkSpace.new()
 
 def CheckBeforeHandler(bufnr: number): dict<any>
@@ -116,7 +123,7 @@ def CheckBeforeHandler(bufnr: number): dict<any>
 	if empty(bufinfolist)
 		return null_dict
 	endif
-	
+
 	return bufinfolist[0]
 enddef
 
@@ -128,41 +135,49 @@ def HandlerBufRead(bufnr: number)
 		return
 	endif
 
-	if wk.map->has_key(bufinfo.name)
-		wk.map[bufinfo.name] = bufinfo.bufnr
-		Log('wk.map has store bufinfo.name', bufinfo.name)
+	var bufnr = bufinfo.bufnr
+	var name = bufinfo.name
+
+	if wk.map->has_key(name)
+		wk.map[name] = bufnr
+		Log('wk.map has store bufinfo.name', name)
 		return
 	endif
 
-	wk.map[bufinfo.name] = bufinfo.bufnr
+	wk.map[name] = bufnr
 
-	var p = project.Project.new(bufname(bufinfo.bufnr))
+	var p = project.Project.new(bufname(bufnr))
 
 	if wk.project_map->has_key(p.name)
-		wk.project_map[p.name]
+		wk.project_map[p.name].Add(p.filename)
 		return
 	endif
 
-	wk.project_map[p.name] = 1
+	var item = WorkSpaceItem.new(p)
+	wk.Add(item)
 
 enddef
 
 def HandlerBufDelete(bufnr: number)
 	Log('BufDeleteHandler')
 	var bufinfo = CheckBeforeHandler(bufnr)
-	
-	Log(bufinfo)
 
-	if !bufinfo
+	Log('bufinfo:', bufinfo)
+
+	if !(bufinfo)
 		return
 	endif
 
+	var name = bufinfo.name
 	Log('type of wk.map', type(wk.map))
-	if !has_key(wk.map, bufinfo.name)
+
+	if !has_key(wk.map, name)
 		return
 	endif
 
-	wk.map->remove(bufinfo.name)
+	wk.map->remove(name)
+
+
 enddef
 
 augroup WorkSpaceListenner

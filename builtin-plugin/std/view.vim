@@ -32,7 +32,7 @@ export class View
 	def new(bufnr: number = -1)
 		this.bufnr = bufnr
 		this.WindowLayoutOpen = G.OR(this.WindowLayoutOpen, this.DefaultWindowLayoutOpen)
-		this.WindowLayoutHidden = G.OR(this.WindowLayoutHidden, this.DefaultWindowLayoutHidden)
+		this.WindowLayoutHidden = G.OR(this.WindowLayoutHidden, BasicDefaultWindowLayoutHidden)
 	enddef
 
 	def SetBufnr(bufnr: number)
@@ -63,7 +63,7 @@ export class View
 	def DefaultWindowLayoutOpen()
 	enddef
 
-	static def DefaultWindowLayoutHidden()
+	static def BasicDefaultWindowLayoutHidden()
 		Log('DefaultWindowLayoutHidden')
 		exec 'b ' .. expand('#')
 	enddef
