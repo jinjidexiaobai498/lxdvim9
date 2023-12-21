@@ -149,9 +149,9 @@ def TestPop()
 	t.PopupMenu()
 enddef
 
-var cf = file.File.new(COLOR_LIST_FILE)
 
 def Test3()
+	var cf = file.File.new(COLOR_LIST_FILE)
 	cf.Set(0, 'evening')
 	echom cf.GetLines()->string()
 	cf.Write()

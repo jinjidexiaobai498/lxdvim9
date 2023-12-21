@@ -70,13 +70,14 @@ export def Setup()
 	autocmd CursorHold * silent call g:CocActionAsync('highlight')
 
 	# Symbol renaming
-	nmap <leader>rn <Plug>(coc-rename)
+	nmap <leader>lr <Plug>(coc-rename)
 
 	# Formatting selected code
-	xmap <leader>F  <Plug>(coc-format-selected)
-	nmap <leader>F  <Plug>(coc-format-selected)
+	#xmap <leader>F  <Plug>(coc-format-selected)
+	#nmap <leader>F  <Plug>(coc-format-selected)
+	nmap <leader>F <Plug>(coc-format)
 
-	augroup mygroup
+	augroup CocAutocmd
 		autocmd!
 		# Setup formatexpr specified filetype(s)
 		autocmd FileType typescript,json setl formatexpr=g:CocAction('formatSelected')

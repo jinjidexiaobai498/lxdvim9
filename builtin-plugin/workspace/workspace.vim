@@ -47,6 +47,7 @@ class WorkSpace
 	this.is_init = false
 	this.is_config = false
 	this.project_map = {}
+	this.is_sync = true
 
 	def ConfigLocalBuf()
 		setlocal nonumber norelativenumber signcolumn=no
@@ -67,12 +68,13 @@ class WorkSpace
 		Log('WorkSpace doesnot has this buffer:', bufinfo)
 		this.map[name] = bufnr
 		this.AddProject(name)
-	
+
 	enddef
 	
 	def AddProject(bufname: string)
 		var p = project.Project.new(bufname)
 
+		this.is_sync = false
 		if this.project_map->has_key(p.name)
 			this.project_map[p.name].Add(p.filename)
 			return
