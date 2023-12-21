@@ -27,6 +27,7 @@ def BasicOptionConfig()
 	g:maplocalleader = ","
 	g:netrw_liststyle = 3
 
+	colorscheme default
 	# use 256 colors when possible
 	if has('gui_running') || (&term =~? 'mlterm\|xterm\|xterm-256\|screen-256')
 		if !has('gui_running')

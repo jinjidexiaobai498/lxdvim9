@@ -24,6 +24,7 @@ export class File
 
 		if flag && !this.is_exsited
 			AssertTrue(['#']->writefile(p, 's') == 0, "Create new file path of " .. path .. "failed")
+			this.is_exsited = true
 		endif
 
 		AssertTrue(this.is_exsited, "EORROR path doesnot exist, path: " .. path)
