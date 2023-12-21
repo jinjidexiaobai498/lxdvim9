@@ -9,9 +9,10 @@ export var debug = false
 var Log = G.GetLog(debug)
 
 def! g:Colors_Save()
-	ColorsList.sfile.Set(0, g:colors_name)
+	var cname = get(g:, 'colors_name', 'default')
+	ColorsList.sfile.Set(0, cname)
 	ColorsList.sfile.Sync()
-	Log('save colorscheme ' .. g:colors_name)
+	Log('save colorscheme ', cname)
 enddef
 
 export def LastColorLoad()
