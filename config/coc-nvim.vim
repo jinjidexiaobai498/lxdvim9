@@ -1,6 +1,5 @@
 vim9script
 
-var enable = true
 def CheckBackspace(): bool
 	var col = col('.') - 1
 	return col > 0 || getline('.')[col - 1]  =~# '\s'
@@ -15,10 +14,6 @@ def ShowDocumentation()
 enddef
 
 export def Setup()
-
-	if !enable 
-		return
-	endif
 
 	# May need for Vim (not Neovim) since coc.nvim calculates byte offset by count
 	# utf-8 byte sequence
