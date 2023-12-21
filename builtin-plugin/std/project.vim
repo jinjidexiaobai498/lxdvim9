@@ -1,5 +1,4 @@
 vim9script
-import "./file.vim" as file
 import "./session.vim" as s
 import './global.vim' as G
 
@@ -27,7 +26,7 @@ export class Project
 	public this.filename: string = null_string
 	def new(path = null_string)
 		this.filename = fnamemodify(expand(path == null_string ? '%' : path->copy()), ':p')
-		this.file_path = GetParentPath(this.filename)
+		this.file_path = G.GetParentPath(this.filename)
 		Log("filename: " .. this.filename .. ", path: " .. this.file_path)
 
 		var p = this.file_path->copy()
@@ -44,7 +43,7 @@ export class Project
 			endfor
 
 			if p != null_string
-				p = GetParentPath(p)
+				p = G.GetParentPath(p)
 			endif
 
 		endwhile
@@ -58,16 +57,6 @@ export class Project
 
 endclass
 
-export def GetParentPath(path: string): string
-	var last_index = path->strridx('/')
-
-	if last_index == 0 
-		return null_string 
-	endif
-
-	return path[ : last_index - 1]
-enddef
-
 def TestProject()
 	#var Pj = Project.new("/home/lxd/Downloads/alacritty.yml")
 	var Pj = Project.new()
@@ -78,7 +67,7 @@ enddef
 
 def Test()
 	var path = '/home/lxd'
-	var par = Project.GetParentPath(path)
+	var par = G.GetParentPath(path)
 	echom par
 	var c = expand('%')
 	var p = fnamemodify(c, ':p')

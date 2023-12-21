@@ -58,7 +58,7 @@ export class ColorsList
 	static def InSync()
 
 		if searched_list == null_list
-			searched_list = globpath(&rtp, 'colors/*.vim')->split('\n')
+			searched_list = globpath(&rtp, ['colors', '*.vim']->join(G.Backslash))->split('\n')
 		endif
 
 		Log('at New() searched list : ' .. searched_list->string())
@@ -74,7 +74,8 @@ export class ColorsList
 		while j < SIZE
 			var i = searched_list[j]->copy()
 			Log('i: ' .. i)
-			var start = i->strridx('/') + 1
+
+			var start = i->strridx(G.Backslash) + 1
 			Log('start: ' .. start)
 			var end = i->strridx('.') - 1
 			Log('end: ' .. end)

@@ -114,17 +114,6 @@ export class File
 
 endclass
 
-def GetParentPath(path: string): string
-	var last_index = path->strridx('/')
-
-	if last_index == 0 
-		return null_string 
-	endif
-
-	return path[ : last_index - 1]
-
-enddef
-
 def Test()
 	var LL = G.GetLog(true, __FILE__, 'lxd')
 	LL('help')

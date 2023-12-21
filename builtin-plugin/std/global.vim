@@ -1,4 +1,7 @@
 vim9script
+
+export const UseWindows = has('win32') || has('win64')
+export const Backslash = UseWindows ? '\' : '/'
 export const DATA_DIR = expand("~/.vim")
 export const HOME_CONFIG_DIR = expand("~/.config")
 export const SELF_PATH = expand('<sfile>:p:h:h')
@@ -41,32 +44,11 @@ enddef
 
 export def CntArgs(...msgs: list<any>): string
 	return join(msgs)
-	#var s = ''
-	#for i in msgs
-		#s ..= ' '
-		#if type(i) != 1
-			#s ..= i->string()
-		#else
-			#s ..= i
-		#endif
-	#endfor
-	#return s
 enddef
 
 
 export def Args(msgs: list<any>): string
 	return join(msgs)
-
-	#var s = ''
-	#for i in msgs
-		#s ..= ' '
-		#if type(i) != 1
-			#s ..= i->string()
-		#else
-			#s ..= i
-		#endif
-	#endfor
-	#return s
 enddef
 
 export def FlagInfo(flag: bool, ...msgs: list<string>)
@@ -133,4 +115,14 @@ export def OR(...obs: list<any>): any
 	return null
 enddef
 
-#Log('SELF_PATH:', SELF_PATH)
+export def GetParentPath(path: string): string
+	var last_index = path->strridx(Backslash)
+
+	if last_index == 0 
+		return null_string 
+	endif
+
+	return path[ : last_index - 1]
+enddef
+
+

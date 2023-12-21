@@ -1,22 +1,21 @@
 vim9script
+import './builtin-plugin/std/global.vim' as G
+
 const VIM_DATA_PATH = expand('~/.vim')
-const VIM_PLUG_PATH = VIM_DATA_PATH .. "/autoload/plug.vim"
+const VIM_PLUG_PATH = VIM_DATA_PATH .. expand("/autoload/plug.vim")
 
 var BASIC_PLUGIN_LIST: list<any> = null_list
 
 export def GetIsExtendInstalledPlugins(): bool
-	return isdirectory(VIM_DATA_PATH .. '/plugged/coc.nvim/.git')
+	return isdirectory(VIM_DATA_PATH .. expand('/plugged/coc.nvim/.git'))
 enddef
 
 export def GetIsBasicInstalledPlugins(): bool
-	return isdirectory(VIM_DATA_PATH .. '/plugged/nerdtree/.git')
+	return isdirectory(VIM_DATA_PATH .. expand('/plugged/nerdtree/.git'))
 enddef
 
-
-import './builtin-plugin/std/global.vim' as utils
 var debug = false
-
-var Log = utils.GetLog(debug)
+var Log = G.GetLog(debug)
 
 def Test()
 	Log("vim_plug_path: ", VIM_PLUG_PATH)
@@ -24,18 +23,17 @@ def Test()
 enddef
 
 export def InstallPlugVim()
-	var vim_plug_path = VIM_PLUG_PATH->copy()
-	Log('vim_plug_path: ' .. vim_plug_path)
 
 	var just_installed = get(g:, '__just_installed__', false)
-	
-	if !filereadable(vim_plug_path)
-		echom "Installing Vim-plug..."
+	var path = expand('~/.vim/autoload')
+	var file = path .. expand('/plug.vim')
 
-		#silent !mkdir -p ~/.vim/autoload
-		#silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-		!mkdir -p ~/.vim/autoload
-		!curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+	if !filereadable(file)
+		echom "Installing Vim-plug..."
+		var args = G.UseWindows ? '' : '-p'
+
+		exe $'!mkdir {args} {path}'
+		exe $'!curl -fLo {file} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
 		g:__just_instaled__ = true
 		just_installed = true
@@ -43,9 +41,9 @@ export def InstallPlugVim()
 
 
 	# manually load vim-plug the first time
-	if just_installed
-		:execute 'source ' .. fnameescape(vim_plug_path)
-	endif
+	# if just_installed
+		exe $'source {file}'
+	# endif
 
 	# active vim-plug
 	call plug#begin("~/.vim/plugged")
