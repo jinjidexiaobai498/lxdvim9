@@ -1,17 +1,20 @@
-# like Spacevim but write in vim9script
+# like Spacevim but write in vim9script, well config and easy to extend in coding 
+
+well config and easy to improve , all config  file add in a project and split into modules and face to object coding
 
 ## Require
 
 1. only vim 9.0 ++
-2. only linux now
+2. only tested on archlinux and windows10 now
 
 ##  install
 ```bash
-git clone https://github.com/jinjidexiaobai498/lxdvim9 ~/.config/vim/lxdvim9 --depth 1
+git clone https://github.com/jinjidexiaobai498/lxdvim9 $HOME/.config/vim/lxdvim9 --depth 1
 ```
 
 add this line in your vimrc
 ```vim
+let g:lxdvim_extend_plug = 0 " change to '1' to enable coc-nvim to use clangd , rust-analyzer and so on
 source ~/.config/vim/lxdvim9/init.vim
 ```
 ## used plugins list

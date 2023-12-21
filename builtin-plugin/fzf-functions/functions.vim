@@ -49,7 +49,7 @@ enddef
 
 export def Setup()
 	nmap <silent> <Plug>FZFFunctions :call <SID>Functions()<CR>
-	command Functions call <SID>Functions()
+	command! Functions call <SID>Functions()
 enddef
 
 #Functions()
