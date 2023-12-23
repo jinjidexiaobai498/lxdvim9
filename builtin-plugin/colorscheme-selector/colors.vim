@@ -7,6 +7,7 @@ const COLOR_LIST_FILE = G.DATA_DIR .. '/' .. COLOR_LIST_NAME
 
 export var debug = false
 var Log = G.GetLog(debug)
+var Assert = G.GetAssertTrue(expand('<sfile>'))
 
 def! g:Colors_Save()
 	var cname = get(g:, 'colors_name', 'default')
@@ -30,26 +31,6 @@ export class ColorsList
 		InSync()
 	enddef
 
-
-	def PopupBrowser()
-
-		var winid = popup_create(colors, {
-			pos: 'center',
-			zindex: 200,
-			drag: false,
-			wrap: 0,
-			border: [],
-			cursorline: true,
-			padding: [0, 1, 0, 1],
-			filter: Filter,
-			mapping: false,
-			filtermode: 'n',
-			callback: CallBack
-		})
-
-		win_execute(winid, 'setlocal cursorline')
-	enddef
-
 	static def GetList(): list<string>
 		InSync()
 		return colors->copy()
@@ -57,13 +38,13 @@ export class ColorsList
 
 	static def InSync()
 
-		if searched_list == null_list
+		if searched_list == null_list || empty(searched_list)
 			searched_list = globpath(&rtp, ['colors', '*.vim']->join(G.Backslash))->split('\n')
 		endif
 
 		Log('at New() searched list : ' .. searched_list->string())
 
-		if colors != null_list
+		if colors != null_list || !empty(colors)
 			Log('at New() colors : ' .. colors->string())
 			return
 		endif
@@ -120,7 +101,13 @@ export class ColorsList
 			filter: Filter
 		})
 
+		var cname = get(g:, 'colors_name', 'default')
+
+		var idx = colors->index(cname)
+		Assert(idx != -1, 'cannot find the color you use', cname)
+
 		win_execute(winid, 'setlocal cursorline')
+		win_execute(winid, 'normal ' .. idx .. 'j')
 	enddef
 endclass
 
@@ -141,7 +128,7 @@ export def Setup()
 enddef
 
 export def PopupBrowser(cl: ColorsList)
-	cl.PopupBrowser()
+	cl.PopupMenu()
 enddef
 
 def TestPop()
@@ -149,16 +136,6 @@ def TestPop()
 	#nmap ,c :call <SID>PopupBrowser(g:_colors_list_)<CR>
 	var t = ColorsList.new()
 	t.PopupMenu()
-enddef
-
-
-def Test3()
-	var cf = file.File.new(COLOR_LIST_FILE)
-	cf.Set(0, 'evening')
-	echom cf.GetLines()->string()
-	cf.Write()
-	var af = file.File.new(COLOR_LIST_FILE)
-	echom af.GetLines()->string()
 enddef
 
 #TestPop()

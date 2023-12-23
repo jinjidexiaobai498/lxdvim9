@@ -1,5 +1,6 @@
 vim9script
 import './global.vim' as G
+import './buffer.vim'
 
 const __FILE__ = expand('<sfile>')
 var debug = false

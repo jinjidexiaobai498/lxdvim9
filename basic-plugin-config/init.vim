@@ -7,6 +7,7 @@ import './nerdcommenter.vim' as ndc
 import './tagbar.vim' as tg
 import './vim-surround.vim' as vsr
 import './vim-which-key.vim' as wk
+import './git-len.vim' as gitlens
 
 export def Setup()
 	ft.Setup()
@@ -16,4 +17,5 @@ export def Setup()
 	tg.Setup()
 	vsr.Setup()
 	wk.Setup()
+	gitlens.Setup()
 enddef

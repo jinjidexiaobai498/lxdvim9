@@ -31,6 +31,9 @@ def BasicPluginLoad()
 
 	G.PlugGlobalAdd('liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }) 
 
+	G.PlugGlobalAdd('Eliot00/git-lens.vim')
+
+
 
 	call plug#end()
 

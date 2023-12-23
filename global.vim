@@ -79,8 +79,8 @@ export def PlugAddList(plugins: list<dict<any>>)
 	var len = len(plugins)
 
 	while i < len
-		Log('name: ' .. plugins[i].name->string())
-		Log('option: ' .. plugins[i].option->string())
+		Log('name: ', plugins[i].name)
+		Log('option: ', plugins[i]->get('option', null_dict))
 		PlugSet(plugins[i])
 		i +=  1
 	endwhile
@@ -114,6 +114,5 @@ export def PluginLoad(plugins: list<dict<any>>, fflag = false)
 		echo "Installing Bundles, please ignore key map error messages"
 		:PlugInstall
 	endif
-
 enddef
 #Test()

@@ -9,7 +9,7 @@ var LANGUIAGE_MAP = {'c': "c", "cpp": 'cpp', 'py': 'python', 'rs': 'rust', 'md':
 var debug = false
 var Log = G.GetLog(debug)
 
-const ProjectType = {
+export const ProjectType = {
 	SingleFile: 0,
 	Project: 1
 }

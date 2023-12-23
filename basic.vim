@@ -33,7 +33,12 @@ def BasicOptionConfig()
 		if !has('gui_running')
 			&t_Co = '256'
 		endif
-		set guifont=JetBrainsMono_Nerd_Font_Mono:h14
+		if has('win32') || has('win64')
+			set guifont=JetBrainsMono_Nerd_Font_Mono_Regular:h17
+		elseif has('gui_gtk')
+			set guifont=JetBrainsMono\ Nerd\ Font\ Mono\ Regular\ 17
+			set guifontwide=Microsoft\ Yahei\ 12,WenQuanYi\ Zen\ Hei\ 12
+		endif
 	endif
 
 	var home = expand('~')

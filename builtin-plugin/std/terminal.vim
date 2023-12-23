@@ -102,8 +102,8 @@ export class Terminal
 
 endclass
 
-var t = Terminal.new()
 def Test()
+	var t = Terminal.new()
 	t.Toggle()
 	Log('termianl:', t)
 	#nmap <leader>tt :call <SID>TH()<CR>
