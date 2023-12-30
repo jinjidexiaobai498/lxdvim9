@@ -101,12 +101,6 @@ export class GitDiffMsg
 		prop_add(lnum, 1, {type: type_name_delete, text: '-'})
 	enddef
 
-	static def ClearMark()
-		prop_remove({type: 'git-diff-msg-add', all: true})
-		prop_remove({type: 'git-diff-msg-delete', all: true})
-		is_marked = false
-	enddef
-
 	def Mark()
 		if is_marked
 			return
@@ -170,18 +164,18 @@ export class GitDiffMsg
 		this.Endline()
 	enddef
 
-	def ToggleMark()
-		if is_marked
-			ClearMark()
-		else
-			this.Mark()
-		endif
-	enddef
-
 endclass
 
+var mark_flag = false
 def ToggleMark(gdm: GitDiffMsg)
-	gdm.ToggleMark()
+	if mark_flag
+		prop_remove({ type: 'git-diff-msg-add', all: true})
+		prop_remove({ type: 'git-diff-msg-delete', all: true})
+		mark_flag = false
+	else
+		gdm.Mark()
+		mark_flag = true
+	endif
 enddef
 
 export def Setup()
@@ -199,8 +193,6 @@ enddef
 def Test2()
 	#p.Mark()
 	#p.Sync()
-	prop_remove({ type: 'git-diff-msg-add', all: true})
-	prop_remove({ type: 'git-diff-msg-delete', all: true})
 enddef
-Test2()
+#Test2()
 #g:Tl = Test2

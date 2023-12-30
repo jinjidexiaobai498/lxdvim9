@@ -26,6 +26,8 @@ export def Setup()
 
 	nmap <leader>fd <Plug>FZFFunctions
 
+	nmap <c-g> <Plug>ToggleGitDiffMark
+
 	nmap <C-\> <Plug>VertTerminalToggle
 	nmap <C-l> <Plug>HortTerminalToggle
 	tnoremap <C-\> <Plug>VertTerminalToggle
