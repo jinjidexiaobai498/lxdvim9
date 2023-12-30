@@ -37,7 +37,7 @@ def BasicOptionConfig()
 			set guifont=JetBrainsMono_Nerd_Font_Mono_Regular:h17
 		elseif has('gui_gtk')
 			set guifont=JetBrainsMono\ Nerd\ Font\ Mono\ Regular\ 17
-			set guifontwide=Microsoft\ Yahei\ 12,WenQuanYi\ Zen\ Hei\ 12
+			set guifontwide=Microsoft\ Yahei\ 17,WenQuanYi\ Zen\ Hei\ 17
 		endif
 	endif
 
@@ -68,7 +68,6 @@ def BasicOptionConfig()
 	set backup
 	set viminfo+=n~/.vim/dirs/viminfo
 
-	set fileencodings=utf-8,gbk,big5
 	set scrolloff=4 # 光标移动到buffer的顶部和底部时保持3行距离
 
 	set mouse=a # 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位）
@@ -78,9 +77,11 @@ def BasicOptionConfig()
 	#设置透明背景
 	highlight Normal ctermbg=none
 	highlight NonText ctermbg=none
+	hi User1 term=bold guifg=#000000 guibg=#00FF00 ctermfg=16 ctermbg=46
 
-	set statusline=[%2.10{g:Stl_mode()}]\ %4.100F\ %m%r%h%w%q\ [%1.10{&ff}]\ [%1.20Y]\ %=[NROW:%1.10l,NCOL:%1.10v][%1.3p%%]\ %20{strftime(\"%d/%m/%y\ -\ %H:%M\")}
+	set statusline=%#IncSearch#\ %2.10{g:Stl_mode()}\ %#TabLineSel#\ %4.100F\ %m%r%h%w%q\ [%1.10{&ff}]\ [%1.20Y]\ %=[BUFNR:%1.10{bufnr()}]\ [NROW:%1.10l,NCOL:%1.10v][%1.3p%%]\ %20{strftime(\"%d/%m/%y\ -\ %H:%M\")}
 
+	#set statusline= %#Comment1.20F 
 	set nocompatible #不要使用vi的键盘模式，而是vim自己的
 	filetype on # 侦测文件类型
 	filetype plugin indent on 
@@ -90,7 +91,7 @@ def BasicOptionConfig()
 
 	set autoread # 设置当文件被改动时自动载入
 	set completeopt=preview,menu  #代码补全 
-	set clipboard=unnamedplus  #共享剪贴板  
+	set clipboard^=unnamed,unnamedplus  #共享剪贴板  
 	set autowrite #自动保存
 	set ruler                   # 打开状态栏标尺
 	#set makeprg=g++\ -Wall\ \ % #make 运行
@@ -120,12 +121,13 @@ def BasicOptionConfig()
 	set hlsearch 
 	set incsearch #搜索逐字符高亮
 
+	set langmenu=en.UTF-8
+	set helplang=en
+	language en_US.UTF-8
+	set fileencodings=utf-8,gbk,big5
 	set enc=utf-8 #编码设置
 	set termencoding=utf-8 #屏幕显示的编码
 	set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
-	set langmenu=en
-	set helplang=cn
-	#set helplang=en
 
 	#set statusline=[%F]%y%r%m%*%=[Line:%l/%L,Column:%c][%p%%]
 	set laststatus=2 # 总是显示状态行
@@ -162,6 +164,7 @@ def BasicKeymap()
 	nnoremap [b :bpre<CR>
 	nnoremap <leader>b :buffers<CR>:b 
 	nnoremap <leader>w :b#<CR>
+	nnoremap <leader>S :so %<CR>
 
 	nmap <leader>ee :e $MYVIMRC<cr>
 	#nmap <silent> <leader>bn :bn<CR>
@@ -173,14 +176,54 @@ def BasicKeymap()
 	nmap <silent> <c-s> :w<CR>
 
 	# emulater Emacs keybinding
-	# alt = 
-	inoremap i <ESC>I 
-	inoremap a <ESC>A
+	inoremap <c-a> <Esc>^i
+	inoremap <c-e> <Esc>$a
 	inoremap <c-f> <Right>
 	inoremap <c-b> <Left>
-	inoremap <c-l> <ESC>ldli
-	inoremap <c-k> <ESC>ld$a
+	inoremap <c-l> <Esc>:call <SID>DeleteNextChar()<CR>i
+	inoremap <c-k> <Esc>:call <SID>DeleteNextString()<CR>a
+	nnoremap <F5> :call <SID>RunCode()<CR>
 
+enddef
+
+def RunCode()
+	var filename = expand('%:t:r')
+	var file = expand('%')
+	if &ft == 'cpp'
+		exe $'!g++ -g -Wall {file} -o {filename}.exe && ./{filename}.exe'
+	elseif &ft == 'c'
+		exe $'!gcc -g -Wall {file} -o {filename}.exe && ./{filename}.exe'
+	elseif &ft == 'rust'
+		exe $'!cargo run'
+	elseif &ft == 'vim'
+		source %
+	endif
+enddef
+
+def DeleteNextString()
+	var pos = col('.')
+	if pos == col('$') - 1
+		echo 'arrived the end of line , please stop delete'
+		return
+	endif
+	if pos == 1 
+		exe 'normal! d$'
+	else
+		exe 'normal! ld$'
+	endif
+enddef
+
+def DeleteNextChar()
+	var pos = col('.')
+	if pos == col('$') - 1
+		echom 'arrived the end of line , please stop delete'
+		return
+	endif
+	if pos == 1 
+		exe 'normal! x'
+	else
+		exe 'normal! lx'
+	endif
 enddef
 
 def ClosePair(char: string): string
@@ -206,5 +249,3 @@ export def Setup()
 	BasicOptionConfig()
 	BasicKeymap()
 enddef
-
-
