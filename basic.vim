@@ -20,8 +20,8 @@ enddef
 #################### options####################
 def BasicOptionConfig()
 
-	g:loaded_netrw       = 0
-	g:loaded_netrwPlugin = 0
+	#g:loaded_netrw       = 0
+	#g:loaded_netrwPlugin = 0
 
 	g:mapleader = " "
 	g:maplocalleader = ","
@@ -95,8 +95,8 @@ def BasicOptionConfig()
 	set autowrite #自动保存
 	set ruler                   # 打开状态栏标尺
 	#set makeprg=g++\ -Wall\ \ % #make 运行
-	#set nocursorline              # 突出显示当前行
-	set cursorline              # 突出显示当前行
+	set nocursorline              # 突出显示当前行
+	#set cursorline              # 突出显示当前行
 	set magic                   # 设置魔术
 	set foldcolumn=0
 	set foldmethod=indent		#利用缩进折叠代码 
