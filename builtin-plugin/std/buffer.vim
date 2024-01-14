@@ -1,5 +1,4 @@
 vim9script
-#import './view.vim' as V
 import './global.vim' as G
 const __FILE__ = expand('<sfile>')
 var debug = true

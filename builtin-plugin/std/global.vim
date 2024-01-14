@@ -106,6 +106,7 @@ export def GetShell(): string
 	endfor
 	return &shell
 enddef
+export const SEHLL = GetShell()
 
 export def OR(...obs: list<any>): any
 	for i in obs

@@ -36,7 +36,8 @@ def BasicOptionConfig()
 		if has('win32') || has('win64')
 			set guifont=JetBrainsMono_Nerd_Font_Mono_Regular:h17
 		elseif has('gui_gtk')
-			set guifont=JetBrainsMono\ Nerd\ Font\ Mono\ Regular\ 17
+			#set guifont=JetBrainsMono\ Nerd\ Font\ Mono\ Regular\ 17
+			set guifont=DejaVu\ Sans\ Mono\ Book\ 17
 			set guifontwide=Microsoft\ Yahei\ 17,WenQuanYi\ Zen\ Hei\ 17
 		endif
 	endif
@@ -153,7 +154,8 @@ enddef
 
 def BasicKeymap()
 	inoremap jk <Esc>
-	tnoremap jk <C-\><C-n>
+	#tnoremap jk <C-\><C-n>
+	tnoremap <C-q> <C-\><C-n>
 
 	PairMatch()
 
@@ -187,12 +189,13 @@ def BasicKeymap()
 enddef
 
 def RunCode()
-	var filename = expand('%:t:r')
 	var file = expand('%')
+	var output = expand('%:h') .. '/' ..  expand('%:t:r') .. ((has('win32') || has('win64') )  ? '.exe' :  '.out')
+
 	if &ft == 'cpp'
-		exe $'!g++ -g -Wall {file} -o {filename}.exe && ./{filename}.exe'
+		exe $'!g++ -g -O2 -Wall {file} -o {output} && {output}'
 	elseif &ft == 'c'
-		exe $'!gcc -g -Wall {file} -o {filename}.exe && ./{filename}.exe'
+		exe $'!gcc -g -O2 -Wall {file} -o {output} && {output}'
 	elseif &ft == 'rust'
 		exe $'!cargo run'
 	elseif &ft == 'vim'

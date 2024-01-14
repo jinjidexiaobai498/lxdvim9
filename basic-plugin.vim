@@ -33,7 +33,7 @@ def BasicPluginLoad()
 
 	G.PlugGlobalAdd('Eliot00/git-lens.vim')
 
-
+	G.PlugGlobalAdd('PhilRunninger/nerdtree-visual-selection')
 
 	call plug#end()
 

@@ -12,6 +12,7 @@ import "./fzf-functions/functions.vim" as functions
 
 import "./gitdiff/gitdiff.vim" as gitdiff
 
+import "./netrw/netrw_toggle.vim" as netrw_toggle
 
 export def Setup()
 	terminal_help.Setup()
@@ -20,6 +21,7 @@ export def Setup()
 	recent_file.Setup()
 	functions.Setup()
 	gitdiff.Setup()
+	netrw_toggle.Setup()
 enddef
 
 

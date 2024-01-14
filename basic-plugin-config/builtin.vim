@@ -17,6 +17,7 @@ export def Setup()
 	nmap ,c <Plug>ColorsPopupBrowser
 	nmap ,r <Plug>RecentFiles
 	nmap ,F <Plug>FZFFunctions
+	nmap ,d <Plug>NetrwToggle
 
 	nmap <leader>sc <Plug>ColorsSync
 	nmap <leader>ss <Plug>PSLSave
@@ -28,10 +29,14 @@ export def Setup()
 
 	nmap <c-g> <Plug>ToggleGitDiffMark
 
-	nmap <C-\> <Plug>VertTerminalToggle
-	nmap <C-l> <Plug>HortTerminalToggle
+	nnoremap <C-\> <Plug>VertTerminalToggle
 	tnoremap <C-\> <Plug>VertTerminalToggle
+
+	nnoremap <C-l> <Plug>HortTerminalToggle
 	tnoremap <C-l> <Plug>HortTerminalToggle
+
+	nnoremap <C-/> <Plug>HortTerminalCwdToggle 
+	tnoremap <C-/> <Plug>HortTerminalCwdToggle 
 
 	if executable('lazygit')
 		nmap ,g :call <SID>Lazygit()<CR>

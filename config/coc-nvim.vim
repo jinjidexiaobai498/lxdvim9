@@ -121,7 +121,7 @@ export def Setup()
 	# Add (Neo)Vim's native statusline support
 	# NOTE: Please see `:h coc-status` for integrations with external plugins that
 	# provide custom statusline: lightline.vim, vim-airline
-	set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+	#set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
 	# Mappings for CoCList
 	# Show all diagnostics
@@ -156,4 +156,5 @@ export def Setup()
 		vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
 		vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
 	endif
+	g:coc_global_extensions = ['coc-json', 'coc-git', 'coc-clangd', 'coc-rust-analyzer', 'coc-jedi', 'coc-cmake', 'coc-highlight']
 enddef

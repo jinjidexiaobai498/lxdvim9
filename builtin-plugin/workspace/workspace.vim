@@ -34,9 +34,15 @@ class WorkSpaceItem
 		this.opened_file_list->add(filename)
 	enddef
 
+	def Length(): number
+		if this.type == ItemType.SingleFile
+			return 1
+		endif
+
+		return this.opened_file_list->len() + 1
+	enddef
+
 endclass
-
-
 
 class WorkSpace
 	static ID = 0
@@ -48,6 +54,7 @@ class WorkSpace
 	this.is_config = false
 	this.project_map = {}
 	this.is_sync = true
+	this.is_render = false
 
 	def ConfigLocalBuf()
 		setlocal nonumber norelativenumber signcolumn=no
@@ -68,9 +75,8 @@ class WorkSpace
 		Log('WorkSpace doesnot has this buffer:', bufinfo)
 		this.map[name] = bufnr
 		this.AddProject(name)
-
 	enddef
-	
+
 	def AddProject(bufname: string)
 		var p = project.Project.new(bufname)
 
@@ -82,7 +88,7 @@ class WorkSpace
 
 		var item = WorkSpaceItem.new(p)
 		this.Add(item)
-	
+
 	enddef
 
 	def Abort(bufinfo: dict<any>)
@@ -101,7 +107,7 @@ class WorkSpace
 		this.is_config = false
 		if bufname(this.bufnr) != ''
 			if bufwinnr(this.bufnr) > 0
-				view.DefaultWindowLayoutHidden()
+				view.SaveCloseWindow()
 			endif
 			exe 'bdelete ' .. this.bufnr
 		endif
@@ -146,6 +152,12 @@ class WorkSpace
 
 	def Add(item: WorkSpaceItem)
 		this.project_map[item.name] = item
+		this.list->add(item)
+	enddef
+
+	def Toggle()
+		this.Init()
+		this._view.Toggle()
 	enddef
 
 
@@ -196,7 +208,7 @@ class DisplyBuf
 	this.toplines: list<string> = []
 	this.endlines: list<string> = []
 	this.contents: list<string> = []
-	
+
 
 endclass
 
