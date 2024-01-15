@@ -1,226 +1,191 @@
 vim9script
-import "../std/session.vim" as session
-import "../std/global.vim" as g
+import "../std/global.vim" as G
+import "../std/session.vim" as ses
 import "../std/project.vim" as project 
 import "../std/file.vim" as file 
 import "../std/collections.vim" as col
-var LIST_NAME: string = "list.txt"
-var SESSION_DIR_NAME: string  = "session_histroy"
-var SESSION_DIR: string = g.DATA_DIR .. "/" ..  SESSION_DIR_NAME
-var MENU_LIST_FILE_PATH: string = SESSION_DIR .. "/" .. LIST_NAME
+
+const LIST_NAME: string = "list.txt"
+const SESSION_DIR_FILENAME: string  = "session_histroy"
+const SESSION_DIR_FULL_PATH: string = [G.DATA_DIR, SESSION_DIR_FILENAME]->join(G.Backslash)
+const MENU_LIST_FILE_PATH: string = [SESSION_DIR_FULL_PATH,  LIST_NAME]->join(G.Backslash)
+const DELETE_KEY_MAP = {'r': true, 'x': true, 'd': true}
+const EXIT_KEY_MAP = {'q': true}
+const EXIT_BUT_NOT_SELECT = {'g': true, "\<Space>": true}
+const SELECT_KEY_MAP = {'s': true}
+
 var debug = false
-var Log = g.GetLog(debug)
-var AssertTrue = g.GetAssertTrue('Project-Session-List')
+var Log = G.GetLog(debug)
+var Info = G.GetLog(true)
+var AssertTrue = G.GetAssertTrue('Project-Session-List')
 
 export class SessionList 
-	this.menu_list: file.File
-	this.session_maps: dict<string>
-	this.view_lines: list<string>
-	this.removes: list<number>
-	this.lines: list<string>
+	this.menu_list_file: file.File
+	this.remove_menu_index_map: dict<number> = {}
+	this.session_workdir_list: list<string> = []
+	this.removes: list<number> = []
+	this.lines: list<string> =  []
 	this.is_sync = true
-	this.popup_option = null_dict
+	this.session: ses.Session
 
-	def DefaultPopup(): dict<any>
-		if this.popup_option != null_dict
-			return this.popup_option->copy()
-		endif
-		var opt = {}
-		opt.maxheight = 100
-		opt.minheight = 5
-		opt.maxwidth = 200
-		opt.minwidth = 20
-		opt.callback = this.Callback
-		opt.filter = this.Filter
-		this.popup_option = opt
-		return this.popup_option->copy()
-
+	# saved name in block file is like "\%home\%lxd\%Projetcs\%lxdvimrc"
+	# the real file name is like "%home%lxd%Projects%lxdvimrc"
+	static def TransSavedNameToFilename(sname: string): string
+		return sname->substitute('\', '', 'g')
 	enddef
 
+	static def  TranSavedNameToPath(str: string): string
+		return substitute(str, '%', '', 'g')
+	enddef
+
+	static def TranPathToFilename(path: string): string
+		return fnameescape(substitute(path, '/', '%', 'g'))
+	enddef
 
 	def new()
-		if !isdirectory(SESSION_DIR) 
-			AssertTrue(mkdir(SESSION_DIR, "p"))
-		endif
-		if !filereadable(MENU_LIST_FILE_PATH)
-			AssertTrue(writefile(['# Vim-Session-Project'], MENU_LIST_FILE_PATH, 's') == 0, 'init Session-Project menu-list-file failed')
-		endif
-		#this.session_list = globpath(SESSION_DIR, "*.vim", 0, 1)
-		this.menu_list = file.File.new(MENU_LIST_FILE_PATH)
+		#this.session_list = globpath(SESSION_DIR_FULL_PATH, "*.vim", 0, 1)
+		this.menu_list_file = file.File.new(MENU_LIST_FILE_PATH, ['# Vim-Session-Project'])
 	enddef
 
 	def Save()
+		G.CloseNerdTree()
+		var session_filename = TranPathToFilename(project.GetProjectRootProto().name) .. '.vim'
 
-		g.CloseNerdTree()
-		var p = project.Project.new()
-		var save_path = TranPathToFilename(p.project_path) .. '.vim'
+		Log('session_filename: ' .. session_filename) 
+		exe "mksession! " .. ([SESSION_DIR_FULL_PATH, session_filename]->join(G.Backslash))
 
-		Log('save_path: ' .. save_path) 
-
-		var ses = session.Session.new(save_path, SESSION_DIR)
-
-		ses.SaveForce()
-
-		if !this.menu_list.ContainsLine(save_path)
-			this.menu_list.Append(save_path)
-			defer this.menu_list.Sync()
+		if !this.menu_list_file.ContainsLine(session_filename)
+			this.menu_list_file.Append(session_filename)
+			this.menu_list_file.Sync()
 		endif
 
 	enddef
 
-	def Sync()
-
+	def SyncRemoves()
 		if this.is_sync
 			return
 		endif
-
 		uniq(sort(this.removes))
-
 		var dis = 0
 		for i in this.removes
-			this.menu_list.Remove(i - dis)
+			this.menu_list_file.Remove(i - dis)
 			dis += 1
 		endfor
-
-		this.menu_list.Sync()
+		this.menu_list_file.Sync()
 		this.removes = []
 		this.is_sync = true
 	enddef
 
 	def Filter(winid: number, key: string): bool
-		if key == 'r'
-			this.is_sync = false
+		if DELETE_KEY_MAP->has_key(key)
 			win_execute(winid, '@l = line(".")')
 			var lnum = str2nr(@l) 
-
 			if lnum == 1 
 				return true
 			endif
 
+			this.is_sync = false
+			var mlist_index = lnum - 1
+			var rlist_index = this.removes->index(mlist_index)
 
-			var idx = lnum - 1
-			@l = (lnum)->string()
-			var ip = this.removes->index(idx)
-
-			if ip != -1
-				@t = this.view_lines[idx]
-				this.removes->remove(ip)
+			@t = this.session_workdir_list[mlist_index]
+			if rlist_index != -1
+				this.removes->remove(rlist_index)
 			else
-				@t = '[x]' .. this.view_lines[idx]
-				this.removes->add(idx)
+				@t = "[x]" .. @t
+				this.removes->add(mlist_index)
 			endif
 
 			win_execute(winid, 'setline(str2nr(@l), @t)')
-
 			Log('lnum: ', lnum)
 			Log('this.removes:', this.removes)
-
-			return true
-
-		elseif key == 'q'
+		elseif EXIT_KEY_MAP->has_key(key)
 			popup_close(winid, -1)
-			return true
+		elseif EXIT_BUT_NOT_SELECT->has_key(key)
+			popup_close(winid, 1)
+		elseif SELECT_KEY_MAP->has_key(key)
+			win_execute(winid, '@l = line(".")')
+			var lnum = str2nr(@l) 
+			popup_close(winid, lnum)
 		else
 			return popup_filter_menu(winid, key)
 		endif
+		return true
 	enddef
 
 	def Callback(winid: number, result: any)
-
 		Log('callback result:', result)
+		if result == -1
+			return
+		endif
 
 		var idx = result - 1
 		if idx > 0 && idx < len(this.lines) && this.removes->index(idx) == -1
 			Log('idx: ', idx)
 			Log('this.lines: ', this.lines)
 
-			var path = [SESSION_DIR, (this.lines[idx])->substitute('\', '', 'g')]->join('/')
+			var path = [SESSION_DIR_FULL_PATH, TransSavedNameToFilename(this.lines[idx])]->join(G.Backslash)
 			Log('path:', path)
 			if !filereadable(path)
-				echom " path does not exists :" .. path
+				Info("path does not exists :", path)
 				this.removes->add(idx)
+				this.is_sync = false
 			else
 				exec "source " .. fnameescape(path)
 			endif
 		endif
 
-		if result != -1
-			this.Sync()
-		endif
+		this.SyncRemoves()
 
 	enddef
 
-	def SyncDispLines(): number
-		var disp_lines = this.menu_list.GetLines()
+	def PreDealDispLines(): number
+		var disp_lines = this.menu_list_file.GetLines()
 		var i = 0
 		var len = len(disp_lines)
 		var maxwidth = 0
 		while i < len
-			disp_lines[i] = TranFilenameToPath(disp_lines[i])
+			disp_lines[i] = TranSavedNameToPath(disp_lines[i])
 			var tl = len(disp_lines[i])
 			maxwidth = tl > maxwidth ? tl : maxwidth
 			i += 1
 		endwhile
-		this.view_lines = disp_lines
-		Log('disp_lines: ', this.view_lines)
+		this.session_workdir_list = disp_lines
+		Log('disp_lines: ', this.session_workdir_list)
 		return maxwidth
 	enddef
 
 	def PopupBrowser()
-
-		this.menu_list.Sync()
-		this.removes = []
-		this.lines = this.menu_list.GetLines()
-		var maxwidth = this.SyncDispLines()
-
-		var opt = this.DefaultPopup()
-		opt.minwidth = maxwidth + 3
-		var winid = popup_menu(this.view_lines, opt)
-
+		this.menu_list_file.Sync()
+		this.lines = this.menu_list_file.GetLines()
+		var maxwidth = this.PreDealDispLines()
+		var winid = popup_menu(this.session_workdir_list, {
+			callback: this.Callback,
+			filter: this.Filter,
+			minwidth: maxwidth + 3
+		})
 		win_execute(winid, 'setlocal cursorline')
 	enddef
 
-
 endclass
 
-export def TranFilenameToPath(str: string): string
-	return substitute(str, '%', '', 'g')
-enddef
-
-def TranPathToFilename(path: string): string
-	return fnameescape(substitute(path, '/', '%', 'g'))
-enddef
-
-export def PopupBrowser(psl: SessionList)
-	Log('start popupbrowser ....')
-	psl.PopupBrowser()
-enddef
-
-export def Save(psl: SessionList)
-	psl.Save()
-enddef
-
-
+var sl = SessionList.new()
+var RunBrowser = () => sl.PopupBrowser()
+export var RunSave = () => sl.Save()
 export def Setup()
-	g:session_list_vim = SessionList.new()
-	nmap <Plug>PSLPopupBrowser :call <SID>PopupBrowser(g:session_list_vim)<CR>
-	nmap <Plug>PSLSave :call <SID>Save(g:session_list_vim)<CR>
+	nmap <Plug>PSLPopupBrowser :call <SID>RunBrowser()<CR>
+	nmap <Plug>PSLSave :call <SID>RunSave()<CR>
+	augroup LastSessionSave
+		au!
+		au VimLeave * exe "call " .. expand("<SID>") .. "RunSave()"
+	augroup END
 enddef
 
-def TestSave()
-	var sl = SessionList.new()
-	sl.Save()
-	sl.SyncDispLines()
-	echom sl->string()
+def Test()
+	Setup()
+	nmap <leader>tt <Plug>PSLPopupBrowser
+	nmap <leader>ts <Plug>PSLSave
 enddef
 
-def TestList()
-	var sl = SessionList.new()
-	#sl.Save()
-	sl.PopupBrowser()
-enddef
-
-#g:Test = TestList
-#TestList()
-#TestSave()
+#Test()
 

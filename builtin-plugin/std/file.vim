@@ -1,6 +1,5 @@
 vim9script
 import './global.vim' as G
-
 const EORROR_FLAG = 'builtin-plugin-File:'
 const __FILE__ = expand('<sfile>')
 var debug = false
@@ -13,109 +12,130 @@ var AssertFalse = G.GetAssertFalse(__FILE__ .. EORROR_FLAG)
 export class File
 	this.path: string
 	this.fullpath: string
+	this.directory: string
 	this.buffer: list<string>
-	this.is_exsited: bool
 	this.len = 0
-	this.sync = true
-	def new(path: string, flag = true)
+	this.is_sync = true
 
-		var p = expand(path)
-		this.is_exsited = filereadable(p)
-
-		if flag && !this.is_exsited
-			AssertTrue(['#']->writefile(p, 's') == 0, "Create new file path of " .. path .. "failed")
-			this.is_exsited = true
+	static def CreateFile(path: string, init_content: list<string> = ['']): bool
+		var dt = fnamemodify(path, ":p:h")
+		Log("parent directory", dt)
+		if !isdirectory(dt) && !mkdir(dt, 'p')
+			return false
 		endif
 
-		AssertTrue(this.is_exsited, "EORROR path doesnot exist, path: " .. path)
-
-		this.path = path
-		this.fullpath = p
-		this.buffer = readfile(p)
-		this.len = len(this.buffer)
-
-		if flag
-			AssertTrue(empty(this.buffer) != 1, 'empty of file ' .. this.fullpath)
+		if !(init_content->writefile(path, 's') == 0)
+			Info("Create new file path of " .. path .. "failed")
+			return false
 		endif
 
+		return true
+	enddef
+
+	static def WriteFile(path: string, buf: list<string>): bool
+		if writefile(buf, path, 's') == 0
+			return true
+		else 
+			Info(' Write file:', path, 'failed , content: ', buf->string(), "")
+			return false
+		endif
+	enddef
+
+	def new(file_path: string, init_content: list<string> = [''], is_created_flag = true)
+		this.path = file_path
+		this.fullpath = fnamemodify(expand(this.path), ":p")
+		this.directory = fnamemodify(this.fullpath, ":h")
+		Log('fullpath:', this.fullpath)
+
+		var is_exsited = !(!filereadable(this.fullpath))
+		if !is_exsited && is_created_flag 
+			is_exsited = CreateFile(this.path, init_content)
+		endif
+		AssertTrue(is_exsited, "EORROR path doesnot exist, path: " .. this.path)
+		this.Sync()
 	enddef
 
 	def ContainsLine(str: string): bool
 		return this.buffer->index(str) != -1
 	enddef
 
+	def IndexOf(str: string): number
+		return this.buffer->index(str)
+	enddef
+
 	def Get(idx: number): string
-		return this.buffer[idx]->copy()
+		return this.buffer[idx]
 	enddef
 
 	def SetLines(lines: list<string>)
 		this.buffer = lines->copy()
-		this.sync = false
-	enddef
-
-	def CheckIndex(idx: number): bool
-		AssertFalse((idx > this.len || idx + this.len <= 0), G.CntArgs(idx, 'out of index in object', this))
-		return true
-
+		this.is_sync = false
 	enddef
 
 	def Insert(idx: number, item: string)
-
-
+		this.is_sync = false
+		this.buffer->insert(item, idx)
 	enddef
 
 	def Set(idx: number, str: string)
-		this.sync = false
-		if idx >= this.len
-			this.buffer->add(str)
-			return
-		endif
-		this.buffer[idx] = str->copy()
+		this.is_sync = false
+		this.buffer[idx] = str
 	enddef
 
 	def Len(): number
-		return this.len->copy()
+		return this.len
 	enddef
 
 	def Append(str: string)
-		this.sync = false
+		this.is_sync = false
 		this.buffer->add(str)
-		#AssertTrue(writefile([str], this.fullpath, 'a') == 0, 'use def Append: failed , Object of' .. this->string())
 		this.len += 1
 	enddef
 
 	def Remove(idx: number): string
-		this.CheckIndex(idx)
-		this.sync = false
-		var res = this.buffer->remove(idx)
-		#AssertTrue(res->string() != '0', 'def Remove() failed of object' .. this->string())
-		Log('res: ', res)
-		return res
+		this.is_sync = false
+		return this.buffer->remove(idx)
 	enddef
 
 	def  Write()
-		this.sync = true
-		AssertTrue((writefile(this.buffer, this.fullpath, 's') == 0), 'use def Write: failed : Object', this->string())
+		this.is_sync = true
+		AssertTrue(WriteFile(this.fullpath, this.buffer), 'use def Write: failed : Object', this->string())
 	enddef
 
 	def Sync()
-		if !this.sync
-			this.Write()
+		if this.is_sync
+			this.buffer = readfile(this.fullpath)
+			this.len = len(this.buffer)
+			return 
 		endif
+		this.Write()
+		this.is_sync = true
 	enddef
 
 	def GetLines(): list<string>
 		return this.buffer->copy()
 	enddef
 
-	def Print()
-		echom this.buffer->string()
-	enddef
-
 endclass
 
 def Test()
-	var LL = G.GetLog(true, __FILE__, 'lxd')
-	LL('help')
+	var f = File.new('./test.vim')
+	#f.Remove(2)
+	var l = f.Len()
+	f.Append('###')
+	var c = f.Get(0)
+	c = '/'
+	l += 1
+	echo l
+	var ls = f.GetLines()
+	ls->add('#')
+	Info('ls', ls)
+	f.Sync()
+	echo f
 enddef
-#Test()
+def Test1()
+	#writefile(['hello'], '/home/lxd/pp/h.txt', 's')
+	var f = File.new('/home/lxd/pp/h.txt', ['hello'])
+enddef
+#Test1()
+

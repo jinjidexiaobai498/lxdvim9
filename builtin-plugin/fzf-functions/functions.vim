@@ -1,9 +1,8 @@
 vim9script
-
 import '../std/global.vim' as G
 import '../std/file.vim' as file
-export var debug = false
 
+export var debug = false
 var Log = G.GetLog(debug)
 
 def Sink(str: string)

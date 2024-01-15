@@ -20,7 +20,7 @@ export class Deque
 		this.capacity = capacity->copy()
 	enddef
 
-	def newDeque(cl: list<any>)
+	def NewDeque(cl: list<any>)
 		this.data = cl->copy()
 		this.len = this.data->len()
 		this.back = this.len

@@ -169,6 +169,7 @@ def BasicKeymap()
 	nnoremap <leader>S :so %<CR>
 
 	nmap <leader>ee :e $MYVIMRC<cr>
+	nmap <leader>co :call <SID>CloseOtherBuffers()<CR>
 	#nmap <silent> <leader>bn :bn<CR>
 	#nmap <silent> <leader>bp :bp<CR>
 	nmap <silent> q :bdelete<CR>
@@ -246,6 +247,19 @@ def PairMatch()
 	inoremap ] <c-r>=<SID>ClosePair(']')<CR>
 	inoremap " ""<ESC>i
 	inoremap ' ''<ESC>i
+enddef
+
+def CloseOtherBuffers()
+	var binfo = getbufinfo()
+	var cbufnr = bufnr()
+	for bufcontent in binfo
+		echom bufcontent.name
+		if cbufnr != bufcontent.bufnr && empty(getbufvar(bufcontent.bufnr, '&bt'))
+			#echo 'bufwipeout' bufcontent.name
+			silent exe "bwipeout " .. bufcontent.bufnr
+		endif
+	endfor
+
 enddef
 
 export def Setup()

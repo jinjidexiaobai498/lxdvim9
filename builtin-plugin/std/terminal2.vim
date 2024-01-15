@@ -2,6 +2,7 @@ vim9script
 # terminal.vim - A simple terminal plugin for Vim
 
 var terminal_plugin = {}
+var termianl_list = ['gnome-terminal', 'wezterm', 'alacritty', 'xterm', 'uxterm', 'kgx']
 
 def TerminalInit()
 

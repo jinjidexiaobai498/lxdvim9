@@ -2,34 +2,21 @@ vim9script
 import "../std/global.vim" as G
 import "../std/file.vim" as file
 const COLOR_LIST_NAME = 'colors_selected_file.vimd'
-const COLOR_LIST_FILE = G.DATA_DIR .. '/' .. COLOR_LIST_NAME
+const COLOR_LIST_FILE = [G.DATA_DIR, COLOR_LIST_NAME]->join(G.Backslash)
 
+const COLOR_SEARCH_PATH_PREFIX = ['colors', '*.vim']->join(G.Backslash)
+const HELP_TEXT = ["Press '<ESC>' or '<Space>' or '<Enter>' to leave this help text", "", "Keymap Grid", "'<F1>' \t\t\t\t: help info", "'s' or '<Space>' \t\t: Load selected color but not exit", "'q' or 'x' or '<ESC>' \t\t: exit and not load", "'<Enter>' \t\t\t: load selected and exit", " 'j' or 'k' \t\t\t: move the cursor"]
+const SELECT_KEY = {s: true, "\<Space>": true}
+const EXIT_KEY = {q: true, x: true, ESC: true}
 
 export var debug = false
 var Log = G.GetLog(debug)
 var Assert = G.GetAssertTrue(expand('<sfile>'))
 
-def! g:Colors_Save()
-	var cname = get(g:, 'colors_name', 'default')
-	ColorsList.sfile.Set(0, cname)
-	ColorsList.sfile.Sync()
-	Log('save colorscheme ', cname)
-enddef
-
-export def LastColorLoad()
-	exe 'colorscheme ' .. ColorsList.sfile.Get(0)
-enddef
-
 export class ColorsList
 	static sfile = file.File.new(COLOR_LIST_FILE)
 	static searched_list: list<string> = null_list
 	static colors: list<string> = null_list
-	static SELECT_KEY = {s: true, '\<Space>': true}
-	static EXIT_KEY = {q: true, x: true, ESC: true}
-
-	def new()
-		InSync()
-	enddef
 
 	static def GetList(): list<string>
 		InSync()
@@ -37,107 +24,77 @@ export class ColorsList
 	enddef
 
 	static def InSync()
-
-		if searched_list == null_list || empty(searched_list)
-			searched_list = globpath(&rtp, ['colors', '*.vim']->join(G.Backslash))->split('\n')
-		endif
-
-		Log('at New() searched list : ' .. searched_list->string())
-
-		if colors != null_list || !empty(colors)
-			Log('at New() colors : ' .. colors->string())
+		if !empty(searched_list) && !empty(colors)
 			return
 		endif
 
-		var j = 0
-		var SIZE = len(searched_list)
-		colors = ['####colors####']
-		while j < SIZE
-			var i = searched_list[j]->copy()
-			Log('i: ' .. i)
+		searched_list = globpath(&rtp, COLOR_SEARCH_PATH_PREFIX, false, true)
+		colors = ['####colors#### ', 'press <F1> to show help file', ""]
+		for color_full_path in searched_list
+			var color = color_full_path[color_full_path->strridx(G.Backslash) + 1 : color_full_path->strridx('.') - 1]
+			colors->add(color)
+		endfor
 
-			var start = i->strridx(G.Backslash) + 1
-			Log('start: ' .. start)
-			var end = i->strridx('.') - 1
-			Log('end: ' .. end)
-			colors->add(i[start : end]->copy())
-			j += 1
-		endwhile
-		Log('at New() colors : ' .. colors->string())
-
-	enddef
-	static def ColorConfig()
-		if !get(g:, 'ColorsList_Config', false)
-			return
-		endif
-		#设置透明背景
-		Log('ColorConfig')
-		highlight Normal ctermbg=none
-		highlight NonText ctermbg=none
+		Log('Sync ColorsList.colors : ', colors)
+		Log('Sync ColorsList.searched list : ', searched_list)
 	enddef
 
 	static def CallBack(id: number, result: any)
-		if result > 1
+		if result > 3
 			exec "colorscheme " .. colors[result - 1]
-			ColorConfig()
 		endif 
 	enddef
 
 	static def Filter(winid: number, key: string): bool
-		if SELECT_KEY->has_key(key)
+		win_execute(winid, '@l = line(".")')
+		if SELECT_KEY->has_key(key) &&  @l->str2nr() > 3
 			win_execute(winid, '@t = getline(".")')
 			exe 'colorscheme ' .. @t
 		elseif EXIT_KEY->has_key(key)
 			popup_close(winid, 0)
+		elseif key == "\<F1>"
+			popup_menu(HELP_TEXT, {
+				CallBack: (i, k) => 1,
+				zindex: 201
+			})
 		else
 			popup_filter_menu(winid, key)
 		endif
 		return true
 	enddef
 
-	def PopupMenu()
+	static def PopupMenu()
+		InSync()
 		var winid = popup_menu(colors, {
 			callback: CallBack,
 			filter: Filter
 		})
-
-		var cname = get(g:, 'colors_name', 'default')
-
-		var idx = colors->index(cname)
-		Assert(idx != -1, 'cannot find the color you use', cname)
-
 		win_execute(winid, 'setlocal cursorline')
-		win_execute(winid, 'normal ' .. idx .. 'j')
+		win_execute(winid, 'normal ' .. colors->index(get(g:, 'colors_name', 'default')) .. 'j')
 	enddef
 endclass
 
-def Sync(cl: ColorsList)
-	cl.InSync()
+def ColorsSave()
+	ColorsList.sfile.Set(0, get(g:, 'colors_name', 'default'))
+	ColorsList.sfile.Sync()
 enddef
+
+var RunColorMenu = () => ColorsList.PopupMenu()
 
 export def Setup()
-	g:_colors_list_ = ColorsList.new()
-	nmap <Plug>ColorsPopupBrowser :call <SID>PopupBrowser(g:_colors_list_)<CR>
-	nmap <Plug>ColosSync :call <SID>Sync(g:_colors_list_)<CR>
-	#LastColorLoad()
+	nmap <Plug>ColorsPopupBrowser :call <SID>RunColorMenu()<CR>
+
 	augroup ColorsSelectedSave
 		au!
-		autocmd VimLeave * call g:Colors_Save()
+		autocmd VimLeave * exe 'call ' .. expand('<SID>') .. 'ColorsSave()'
 	augroup END
-	LastColorLoad()
+
+	Log('Load colorscheme which last session use and saved int ColorsList.sfile')
+	exe 'colorscheme ' .. ColorsList.sfile.Get(0)
 enddef
 
-export def PopupBrowser(cl: ColorsList)
-	cl.PopupMenu()
+def Test()
+	Setup()
+	nmap <leader>tt <Plug>ColorsPopupBrowser
 enddef
-
-def TestPop()
-	#g:_colors_list_ = ColorsList.new()
-	#nmap ,c :call <SID>PopupBrowser(g:_colors_list_)<CR>
-	var t = ColorsList.new()
-	t.PopupMenu()
-enddef
-
-#TestPop()
-#Test2()
-#Test4()
+#Test()
