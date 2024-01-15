@@ -2,9 +2,9 @@ vim9script
 import './constant.vim' as C
 export const UseWindows = has('win32') || has('win64')
 export const Backslash = UseWindows ? '\' : '/'
-export const DATA_DIR = expand("~/.vim")
 export const HOME = expand('~')
-export const HOME_CONFIG_DIR = expand("~/.config")
+export const DATA_DIR = [HOME, '.vim']->join(Backslash)
+export const HOME_CONFIG_DIR = [HOME, ".config"]->join(Backslash)
 export const SELF_PATH = expand('<sfile>:p:h:h')
 export const TAB = '    '
 export var debug = false

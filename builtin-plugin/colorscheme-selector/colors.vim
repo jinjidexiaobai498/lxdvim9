@@ -86,7 +86,7 @@ export def Setup()
 
 	augroup ColorsSelectedSave
 		au!
-		autocmd VimLeave * exe 'call ' .. expand('<SID>') .. 'ColorsSave()'
+		autocmd VimLeave * call ColorsSave()
 	augroup END
 
 	Log('Load colorscheme which last session use and saved int ColorsList.sfile')

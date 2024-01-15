@@ -94,7 +94,7 @@ def TestProject()
 enddef
 
 def Test()
-	var path = '/home/lxd'
+	var path = G.HOME
 	var par = G.GetParentPath(path)
 	echom par
 	var c = expand('%')

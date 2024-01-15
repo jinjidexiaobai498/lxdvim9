@@ -14,7 +14,7 @@ const EXIT_KEY_MAP = {'q': true}
 const EXIT_BUT_NOT_SELECT = {'g': true, "\<Space>": true}
 const SELECT_KEY_MAP = {'s': true}
 
-var debug = false
+var debug = true
 var Log = G.GetLog(debug)
 var Info = G.GetLog(true)
 var AssertTrue = G.GetAssertTrue('Project-Session-List')
@@ -31,15 +31,27 @@ export class SessionList
 	# saved name in block file is like "\%home\%lxd\%Projetcs\%lxdvimrc"
 	# the real file name is like "%home%lxd%Projects%lxdvimrc"
 	static def TransSavedNameToFilename(sname: string): string
+		Log('saved name', sname)
 		return sname->substitute('\', '', 'g')
 	enddef
 
-	static def  TranSavedNameToPath(str: string): string
-		return substitute(str, '%', '', 'g')
+	static def  TranSavedNameToPath(sname: string): string
+		var s = sname
+		if G.UseWindows
+			s = sname[0] .. ':' ..  sname[3 : ]
+		endif
+		return substitute(s, '%', '', 'g')
 	enddef
 
 	static def TranPathToFilename(path: string): string
-		return fnameescape(substitute(path, '/', '%', 'g'))
+		var s = path
+		if G.UseWindows
+			s = substitute(path, ':', '%', 'g')
+		endif
+		Log('path:', s)
+		var p = fnameescape(substitute(s, G.Backslash, '%', 'g')) 
+		Log('filename:', p)
+		return p
 	enddef
 
 	def new()
@@ -50,7 +62,6 @@ export class SessionList
 	def Save()
 		G.CloseNerdTree()
 		var session_filename = TranPathToFilename(project.GetProjectRootProto().name) .. '.vim'
-
 		Log('session_filename: ' .. session_filename) 
 		exe "mksession! " .. ([SESSION_DIR_FULL_PATH, session_filename]->join(G.Backslash))
 
@@ -177,7 +188,7 @@ export def Setup()
 	nmap <Plug>PSLSave :call <SID>RunSave()<CR>
 	augroup LastSessionSave
 		au!
-		au VimLeave * exe "call " .. expand("<SID>") .. "RunSave()"
+		au VimLeave * call RunSave()
 	augroup END
 enddef
 
