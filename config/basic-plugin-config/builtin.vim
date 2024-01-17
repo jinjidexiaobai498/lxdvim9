@@ -1,6 +1,6 @@
 vim9script
 
-import '../builtin-plugin/init.vim' as builtin
+import '../../builtin-plugin/init.vim' as builtin
 
 export def Setup()
 
@@ -26,16 +26,16 @@ export def Setup()
 
 	nmap <leader>fd <Plug>FZFFunctions
 
-	nmap <c-g> <Plug>ToggleGitDiffMark
+	nmap <c-g> <Plug>RefreshGitDiffMark
 
-	nnoremap <C-\> <Plug>VertTerminalToggle
-	tnoremap <C-\> <Plug>VertTerminalToggle
+	nnoremap <C-/> <Plug>VertTerminalToggle
+	tnoremap <C-/> <Plug>VertTerminalToggle
 
-	nnoremap <C-l> <Plug>HortTerminalToggle
-	tnoremap <C-l> <Plug>HortTerminalToggle
+	nnoremap <C-\> <Plug>HortTerminalToggle
+	tnoremap <C-\> <Plug>HortTerminalToggle
 
-	nnoremap <C-/> <Plug>HortTerminalCwdToggle 
-	tnoremap <C-/> <Plug>HortTerminalCwdToggle 
+	nnoremap <C-l> <Plug>HortTerminalCwdToggle 
+	tnoremap <C-l> <Plug>HortTerminalCwdToggle 
 
 	if executable('lazygit')
 		nmap ,g :call <SID>Lazygit()<CR>

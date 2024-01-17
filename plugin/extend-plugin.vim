@@ -1,6 +1,6 @@
 vim9script
 
-import './global.vim' as G
+import '../std/plug_manager.vim' as plug
 export def Setup()
 
 	if !get(g:, 'lxdvim_extend_plug', false)
@@ -13,7 +13,7 @@ export def Setup()
 			option: {'branch': 'release'}
 		},
 	]
-	G.PluginLoad(plug_list)
+	plug.PluginLoad(plug_list)
 enddef
 
 #Setup()

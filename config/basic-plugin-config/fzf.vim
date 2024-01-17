@@ -1,5 +1,5 @@
 vim9script
-import '../builtin-plugin/std/project.vim' as project
+import '../../std/project.vim' as project
 export def Setup()
 
 	#find  in current buffer 

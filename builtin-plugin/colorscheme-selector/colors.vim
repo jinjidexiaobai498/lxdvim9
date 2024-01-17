@@ -1,6 +1,6 @@
 vim9script
-import "../std/global.vim" as G
-import "../std/file.vim" as file
+import "../../std/global.vim" as G
+import "../../std/file.vim" as file
 const COLOR_LIST_NAME = 'colors_selected_file.vimd'
 const COLOR_LIST_FILE = [G.DATA_DIR, COLOR_LIST_NAME]->join(G.Backslash)
 

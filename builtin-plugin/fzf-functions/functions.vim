@@ -1,6 +1,6 @@
 vim9script
-import '../std/global.vim' as G
-import '../std/file.vim' as file
+import '../../std/global.vim' as G
+import '../../std/file.vim' as file
 
 export var debug = false
 var Log = G.GetLog(debug)

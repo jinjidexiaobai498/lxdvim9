@@ -1,224 +1,132 @@
 vim9script
-import '../std/global.vim' as G
-import '../std/view.vim' as view
-import '../std/project.vim' as project
+import '../../std/global.vim' as G
+import '../../std/view.vim' as view
+import '../../std/project.vim' as project
+
+const __FILE__ = expand('<sfile>')
 var debug = true
-var Log = G.GetLog(debug)
-var info = true
-var Info = G.GetLog(info)
+var Info = G.GetLog(true)
+var Log = G.GetLog(debug, __FILE__)
+var AssertTrue = G.GetAssertTrue(__FILE__)
+
 const BUF_NAME_PREFIX = '___WorkSpace___'
 const INDENT_SPACE = '  '
-
 const ItemType = {
 	SingleFile: 0,
 	Project: 1
 }
-
 const ProjectTypeDecode = ['SingleFile', 'Project']
+const TAB = G.TAB
+const WorkSpaceBufName = "WORSPACE_BUFFER"
 
-class WorkSpaceItem
-	public this.name
-	public this.type: number
-	public this.opened_file_list: list<string>
+export class WorkSpace
+	static content: list<string> = ['WorkSpace Brower', '']
+	static projetc_map: dict<any> = {}
+	static buflist: list<number> = []
+	static file_list: list<string> = []
+	static is_sync = false
+	static is_init = false
+	static ID = 1
 
-	def new(p: project.Project)
-		this.name = p.name
-		this.type = p.type
-		this.Add(p.filename)
-	enddef
-
-	def Add(filename: string)
-		if this.type == ItemType.SingleFile
-			return
-		endif
-		this.opened_file_list->add(filename)
-	enddef
-
-	def Length(): number
-		if this.type == ItemType.SingleFile
-			return 1
-		endif
-
-		return this.opened_file_list->len() + 1
-	enddef
-
-endclass
-
-class WorkSpace
-	static ID = 0
-	public this.map: dict<number> = {}
-	public this.list: list<WorkSpaceItem> = []
-	this._view: view.View
-	this.bufnr: number = -1
-	this.is_init = false
-	this.is_config = false
-	this.project_map = {}
-	this.is_sync = true
-	this.is_render = false
-
-	def ConfigLocalBuf()
-		setlocal nonumber norelativenumber signcolumn=no
-		setlocal bufhidden=hide
-		setlocal nobuflisted
-	enddef
-
-	def Read(bufinfo: dict<any>)
-		var bufnr = bufinfo.bufnr
-		var name = bufinfo.name
-
-		if this.map->has_key(name)
-			this.map[name] = bufnr
-			Log('this.map has store bufinfo.name', name)
+	static def Render()
+		if is_sync || !is_init
 			return
 		endif
 
-		Log('WorkSpace doesnot has this buffer:', bufinfo)
-		this.map[name] = bufnr
-		this.AddProject(name)
-	enddef
+		#if this._view.GetIsView()
+		#win_execute(winnr(), 'normal dG')
+		exe 'normal dG'
+		#endif
 
-	def AddProject(bufname: string)
-		var p = project.Project.new(bufname)
-
-		this.is_sync = false
-		if this.project_map->has_key(p.name)
-			this.project_map[p.name].Add(p.filename)
-			return
-		endif
-
-		var item = WorkSpaceItem.new(p)
-		this.Add(item)
-
-	enddef
-
-	def Abort(bufinfo: dict<any>)
-		var name = bufinfo.name
-		Log('type of this.map', type(this.map))
-
-		if !has_key(this.map, name)
-			return
-		endif
-
-		this.map->remove(name)
-	enddef
-
-	def Clear()
-		this.is_init = false
-		this.is_config = false
-		if bufname(this.bufnr) != ''
-			if bufwinnr(this.bufnr) > 0
-				view.SaveCloseWindow()
+		for bufnr in buflist
+			var pdict = project.GetProjectRootProto(bufname(bufnr))
+			var iname = pdict.filename->slice(pdict.project_path->len() + 1)
+			if projetc_map->has_key(pdict.project_path) && projetc_map[pdict.project_path]->index(iname) == -1
+				projetc_map[pdict.project_path]->add(iname)
+				file_list->add(pdict.filename)
 			endif
-			exe 'bdelete ' .. this.bufnr
-		endif
+		endfor
 
-		this.bufnr = -1
+		var i = 0
+		for [path, flist] in projetc_map->items()
+			i += 1
+			setline(i, path)
+			for fl in flist
+				i += 1
+				setline(i, TAB .. fl)
+			endfor
+		endfor
+
 	enddef
 
-	def CheckBufStatus()
-		if !G.BufExists(this.bufnr)
-			this.Clear()
-		endif
+
+	this._view: view.View
+	this.bufnr = -1
+	def new(WinOpen: func = null_function, WinHidden: func = null_function)
+		this._view = view.View.new(-1, WinOpen, WinHidden)
 	enddef
 
 	def Init()
-
-		this.CheckBufStatus()
-
-		if this.is_init
+		if is_init
 			return
 		endif
-
 		ID += 1
-		this.bufnr = bufadd(BUF_NAME_PREFIX .. ID)
-		bufload(this.bufnr)
-		this.is_init = true
-		this._view = view.View.new(this.bufnr)
-		this._view.WindowLayoutOpen = this.WindowLayoutOpen
-		this._view.WindowLayoutHidden = view.WindowLayoutHidden
+		this.bufnr = bufadd(WORSPACE_BUFFER .. ID)
+		this._view.SetBufnr(this.bufnr)
+		this._view.WindowLayoutOpen()
+		var winnr = winnr()
+		view.ConfigLocalHiddenToggleBuffer()
 	enddef
 
-	static def DefaultWindowLayoutOpen()
-		exec 'vert :15 split'
-		exe 'b ' .. this.bufnr
-		if !this.is_config 
-			this.ConfigLocalBuf()
-		endif
+	def Open()
+		this._view.WindowLayoutOpen()
+		exe "b " .. this.bufnr
+		this.Render()
 	enddef
 
-	def new(WindowLayoutOpen: func = null_function)
-		this.WindowLayoutOpen = G.OR(WindowLayoutOpen, DefaultWindowLayoutOpen)
+	def Close()
+		this._view.WindowLayoutHidden()
 	enddef
-
-	def Add(item: WorkSpaceItem)
-		this.project_map[item.name] = item
-		this.list->add(item)
-	enddef
-
-	def Toggle()
-		this.Init()
-		this._view.Toggle()
-	enddef
-
 
 endclass
-var wk = WorkSpace.new()
+def DefaultWorkSpaceWinlayoutOpen()
+	exe ':30 vsplit'
+enddef
 
-def CheckBeforeHandler(bufnr: number): dict<any>
-	var bt = getbufvar(bufnr, '&buftype')
-	Log('buftype:', bt, 'bufnr:', bufnr)
-
-	if !empty(bt)
-		return null_dict
-	endif
-
-	var bufinfolist = getbufinfo(bufnr)
-	if empty(bufinfolist)
-		return null_dict
-	endif
-
-	return bufinfolist[0]
+def CheckBufferNormalFile(bufnr: number): bool
+	return (empty(getbufvar(bufnr, "&bt")))
 enddef
 
 def HandlerBufRead(bufnr: number)
-	Log('wk :', wk)
-	Log('BufReadPostHandler')
-	var bufinfo = CheckBeforeHandler(bufnr)
-	if bufinfo == null_dict
+	if ! CheckBufferNormalFile(bufnr) || WorkSpace.buflist->index(bufnr) != -1
 		return
 	endif
-	wk.Read(bufinfo)
+
+	WorkSpace.buflist->add(bufnr)
+	WorkSpace.is_sync = false
 enddef
 
 def HandlerBufDelete(bufnr: number)
-	Log('BufDeleteHandler')
-	var bufinfo = CheckBeforeHandler(bufnr)
-
-	Log('bufinfo:', bufinfo)
-
-	if !(bufinfo)
+	if ! CheckBufferNormalFile(bufnr)
 		return
 	endif
 
-	wk.Abort(bufinfo)
+	var idx = WorkSpace.buflist->index(bufnr)
+	if idx == -1
+		return
+	endif
 
+	WorkSpace.is_sync = false
+	WorkSpace.buflist->remove(idx)
 enddef
 
-class DisplyBuf
-	this.toplines: list<string> = []
-	this.endlines: list<string> = []
-	this.contents: list<string> = []
-
-
-endclass
-
-augroup WorkSpaceListenner
-	au!
-	au BufReadPost * call HandlerBufRead(expand('<abuf>')->str2nr())
-	au BufDelete * call HandlerBufDelete(expand('<abuf>')->str2nr())
-	au BufWipeout * call HandlerBufDelete(expand('<abuf>')->str2nr())
-	# for test easy
-	#au BufUnload * call HandlerBufDelete()
-augroup END
+export def Setup()
+	augroup WorkSpaceListenner
+		au!
+		au BufReadPost * call HandlerBufRead(expand('<abuf>')->str2nr())
+		au BufDelete * call HandlerBufDelete(expand('<abuf>')->str2nr())
+		au BufWipeout * call HandlerBufDelete(expand('<abuf>')->str2nr())
+	augroup END
+enddef
 
 g:WInfo = funcref(Info, [wk])

@@ -117,7 +117,7 @@ var len = HOME->strlen()
 export def GetParentPath(path: string): string
 	var last_index = path->strridx(Backslash)
 
-	if last_index <= len 
+	if last_index < len
 		return null_string 
 	endif
 

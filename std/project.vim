@@ -6,7 +6,7 @@ var PROJECT_LABLE = {'.git': "git", "Cargo.toml": "Cargo", 'CMakeList.txt': "CMa
 
 var LANGUIAGE_MAP = {'c': "c", "cpp": 'cpp', 'py': 'python', 'rs': 'rust', 'md': 'markdown', 'js': "javascript", 'css': 'css', 'html': 'html', "xml": 'xml', 'toml': 'toml', 'json': 'json'}
 
-var debug = true
+var debug = false
 var Log = G.GetLog(debug)
 
 export const ProjectType = {
@@ -94,7 +94,7 @@ def TestProject()
 enddef
 
 def Test()
-	var path = G.HOME
+	var path = '/home/lxd'
 	var par = G.GetParentPath(path)
 	echom par
 	var c = expand('%')

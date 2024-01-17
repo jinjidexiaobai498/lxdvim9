@@ -6,7 +6,7 @@ import "./vim-project-session/project-session-list.vim" as project
 
 import "./colorscheme-selector/colors.vim" as colors_selector
 
-import "./recent-files/recent_file.vim" as recent_file
+import "./fzf-recentfiles/recentfiles.vim" as recentfiles
 
 import "./fzf-functions/functions.vim" as functions
 
@@ -18,7 +18,7 @@ export def Setup()
 	terminal_help.Setup()
 	project.Setup()
 	colors_selector.Setup()
-	recent_file.Setup()
+	recentfiles.Setup()
 	functions.Setup()
 	gitdiff.Setup()
 	netrw_toggle.Setup()

@@ -1,5 +1,5 @@
 vim9script
-import '../std/view.vim' as view
+import '../../std/view.vim' as view
 
 def Open()
 	exe ":20 Sexplore!"

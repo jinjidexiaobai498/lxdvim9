@@ -1,6 +1,6 @@
 vim9script noclear
 
-import '../std/terminal.vim' as terminal
+import '../../std/terminal.vim' as terminal
 
 var VertShow = () => {
 	exe 'vert bo :37 split'
@@ -14,18 +14,9 @@ var vert_term = terminal.Terminal.new(VertShow)
 var hort_term = terminal.Terminal.new(HortShow)
 var hort_term_cwd = terminal.Terminal.new(HortShow, null_function, null_string, true)
 
-
-def HortTerminalToggle()
-	hort_term.Toggle()
-enddef
-
-def VertTerminalToggle()
-	vert_term.Toggle()
-enddef
-
-def HortTerminalCwdToggle()
-	hort_term_cwd.Toggle()
-enddef
+var HortTerminalToggle = () => hort_term.Toggle()
+var VertTerminalToggle = () => vert_term.Toggle()
+var HortTerminalCwdToggle = () => hort_term_cwd.Toggle()
 
 export def Setup()
 	nnoremap <Plug>HortTerminalToggle :call <SID>HortTerminalToggle()<cr>

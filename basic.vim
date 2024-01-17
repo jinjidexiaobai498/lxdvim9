@@ -1,4 +1,6 @@
 vim9script noclear
+import "./std/global.vim" as G
+var AssertTrue = G.GetAssertTrue(expand('<sfile>'))
 
 def! g:Stl_mode(): string
 	if &filetype == 'help'
@@ -42,27 +44,24 @@ def BasicOptionConfig()
 		endif
 	endif
 
-	var home = expand('~')
-	var DATA_DIR = home .. '/.vim'
-	if !isdirectory(DATA_DIR)
-		assert_true(mkdir(DATA_DIR, 'p'))
+	if !isdirectory(G.DATA_DIR)
+		AssertTrue(mkdir(G.DATA_DIR, 'p'))
 	endif
 
-	var cache = home .. '/.cache/vim'
-	&undodir = cache .. "/undo"
-	&backupdir = cache ..  "/backup"
-	&dir =  cache .. "/swap"
+	&undodir	= expand('~/.cache/vim/undo')
+	&backupdir	= expand('~/.cache/vim/backup')
+	&dir		= expand('~/.cache/vim/swap')
 
 	if !isdirectory(&dir)
-		assert_true(mkdir(&dir, 'p'))
+		AssertTrue(mkdir(&dir, 'p'))
 	endif
 
 	if !isdirectory(&backupdir)
-		assert_true(mkdir(&backupdir, 'p'))
+		AssertTrue(mkdir(&backupdir, 'p'))
 	endif
 
 	if !isdirectory(&dir) 
-		assert_true(mkdir(&dir, 'p'))
+		AssertTrue(mkdir(&dir, 'p'))
 	endif
 
 	set undofile

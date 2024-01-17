@@ -1,9 +1,9 @@
 vim9script
-import "../std/global.vim" as G
-import "../std/session.vim" as ses
-import "../std/project.vim" as project 
-import "../std/file.vim" as file 
-import "../std/collections.vim" as col
+import "../../std/global.vim" as G
+import "../../std/session.vim" as ses
+import "../../std/project.vim" as project 
+import "../../std/file.vim" as file 
+import "../../std/collections.vim" as col
 
 const LIST_NAME: string = "list.txt"
 const SESSION_DIR_FILENAME: string  = "session_histroy"
@@ -14,7 +14,7 @@ const EXIT_KEY_MAP = {'q': true}
 const EXIT_BUT_NOT_SELECT = {'g': true, "\<Space>": true}
 const SELECT_KEY_MAP = {'s': true}
 
-var debug = true
+var debug = false
 var Log = G.GetLog(debug)
 var Info = G.GetLog(true)
 var AssertTrue = G.GetAssertTrue('Project-Session-List')
@@ -31,7 +31,6 @@ export class SessionList
 	# saved name in block file is like "\%home\%lxd\%Projetcs\%lxdvimrc"
 	# the real file name is like "%home%lxd%Projects%lxdvimrc"
 	static def TransSavedNameToFilename(sname: string): string
-		Log('saved name', sname)
 		return sname->substitute('\', '', 'g')
 	enddef
 
@@ -49,9 +48,7 @@ export class SessionList
 			s = substitute(path, ':', '%', 'g')
 		endif
 		Log('path:', s)
-		var p = fnameescape(substitute(s, G.Backslash, '%', 'g')) 
-		Log('filename:', p)
-		return p
+		return fnameescape(substitute(s, G.Backslash, '%', 'g'))
 	enddef
 
 	def new()

@@ -86,8 +86,8 @@ endclass
 def Test()
 	var t = Terminal.new(null_function, null_function, null_string, true)
 	g:Lt = () => t.Toggle()
-	nnoremap <c-/> :call g:Lt()<CR>
-	tnoremap <c-/> <C-\><C-n>:call g:Lt()<CR>
+	nnoremap <c-x> :call g:Lt()<CR>
+	tnoremap <c-x> <C-\><C-n>:call g:Lt()<CR>
 enddef
 
 #Test()
